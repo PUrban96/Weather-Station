@@ -47,13 +47,13 @@ static void GetForecastDataFormJSON(const char *JSONWeatherData, const char *Par
 
 void AirPollutionDataParse(const char *AirPollutionJSON)
 {
-    Common_ArrayClean(AirQualityIndex, 2);
+    //Common_ArrayClean(AirQualityIndex, 2);
     GetWeatherDataFormJSON(AirPollutionJSON, "aqi", AirQualityIndex, Int);
 }
 
 void CurrentWeatherDataParse(const char *CurrentWeatherJSON)
 {
-    Common_ArrayClean(AirQualityIndex, 5);
+    Common_ArrayClean(CurrentWeatherPressure, 5);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "pressure", CurrentWeatherPressure, Int);
 
     Common_ArrayClean(CurrentWeatherHumidity, 4);
