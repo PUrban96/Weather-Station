@@ -899,6 +899,11 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
         LCDFrontend_ConfigSetRefleshFlag();
     }
 
+    if(GPIO_Pin == BUTTON_1_Pin)
+    {
+        ESP8266_ToggleDebugFlag();
+    }
+
 }
 
 /* USER CODE END 4 */

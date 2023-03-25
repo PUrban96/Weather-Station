@@ -13,6 +13,7 @@
 #include "stdio.h"
 #include "DateAndTime.h"
 #include <stdlib.h>
+#include "Common.h"
 
 char AirQualityIndex[2] = "5";
 char CurrentWeatherPressure[5] = "0";
@@ -46,22 +47,46 @@ static void GetForecastDataFormJSON(const char *JSONWeatherData, const char *Par
 
 void AirPollutionDataParse(const char *AirPollutionJSON)
 {
+    Common_ArrayClean(AirQualityIndex, 2);
     GetWeatherDataFormJSON(AirPollutionJSON, "aqi", AirQualityIndex, Int);
 }
 
 void CurrentWeatherDataParse(const char *CurrentWeatherJSON)
 {
+    Common_ArrayClean(AirQualityIndex, 5);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "pressure", CurrentWeatherPressure, Int);
+
+    Common_ArrayClean(CurrentWeatherHumidity, 4);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "humidity", CurrentWeatherHumidity, Int);
+
+    Common_ArrayClean(CurrentWeatherTemperature, 6);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "temp", CurrentWeatherTemperature, Int);
+
+    //Common_ArrayClean(CurrentWeatherRain1h, 6);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "1h", CurrentWeatherRain1h, Int);
+
+    Common_ArrayClean(CurrentWeatherSunset, 12);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "sunset", CurrentWeatherSunset, Int);
+
+    Common_ArrayClean(CurrentWeatherSunrise, 12);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "sunrise", CurrentWeatherSunrise, Int);
+
+    Common_ArrayClean(CurrentWeatherWindSpeed, 6);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "speed", CurrentWeatherWindSpeed, Int);
+
+    Common_ArrayClean(CurrentWeatherWindDegree, 6);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "deg", CurrentWeatherWindDegree, Int);
+
+    Common_ArrayClean(CurrentWeatherWindCloudness, 4);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "all", CurrentWeatherWindCloudness, Int);
+
+    Common_ArrayClean(CurrentWeatherWindVisibility, 6);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "visibility", CurrentWeatherWindVisibility, Int);
+
+    Common_ArrayClean(CurrentWeatherIcon, 4);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "icon", CurrentWeatherIcon, String);
+
+    Common_ArrayClean(CurrentWeatherActualDate, 12);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "dt", CurrentWeatherActualDate, Int);
 }
 

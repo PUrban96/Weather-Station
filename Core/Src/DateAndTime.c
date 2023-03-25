@@ -59,15 +59,15 @@ void CheckActualDateAfterRestart(void)
         Year = (1900 + Year) - 2000;
         DateTime_SetNewDate(Day, DayWeek, Month, Year);
 
-         ESP8266_SetFirstDataSuccessFlag(FLAG_RESET);
+        ESP8266_SetFirstDataSuccessFlag(FLAG_RESET);
     }
 }
 
 void DateTime_SetNewDate(uint8_t Day, uint8_t DayWeek, uint8_t Month, uint8_t Year)
 {
-    RTC_DateTypeDef NewRtcDate = {0};
+    RTC_DateTypeDef NewRtcDate = { 0 };
     NewRtcDate.WeekDay = DayWeek;
-    NewRtcDate.Month = Month ;
+    NewRtcDate.Month = Month;
     NewRtcDate.Date = Day;
     NewRtcDate.Year = Year;
     HAL_RTC_SetDate(&RTC_HANDLER, &NewRtcDate, RTC_FORMAT_BIN);
@@ -75,7 +75,7 @@ void DateTime_SetNewDate(uint8_t Day, uint8_t DayWeek, uint8_t Month, uint8_t Ye
 
 void DateTime_SetNewTime(uint8_t Hour, uint8_t Minutes, uint8_t Seconds)
 {
-    RTC_TimeTypeDef sTime = {0};
+    RTC_TimeTypeDef sTime = { 0 };
     sTime.Hours = Hour;
     sTime.Minutes = Minutes;
     sTime.Seconds = Seconds;
@@ -114,6 +114,8 @@ uint8_t GetRTCDateYear(void)
 
 char* GetDayString(void)
 {
+    Common_ArrayClean(DayString, 12);
+
     switch(RtcDate.WeekDay)
     {
     case 0:
@@ -173,7 +175,7 @@ static void NextDayString(char *NexDayString, uint8_t NextDayNumber)
     }
     else if(RtcDate.WeekDay + NextDayNumber > 6)
     {
-        CalculateDay = ((RtcDate.WeekDay + NextDayNumber) % 6)-1;
+        CalculateDay = ((RtcDate.WeekDay + NextDayNumber) % 6) - 1;
     }
 
     switch(CalculateDay)

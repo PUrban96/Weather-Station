@@ -18,11 +18,12 @@
 #include "CircularBuffer.h"
 #include "SDCardConfig.h"
 
-char Forecast[17000];
-
+static char Forecast[17000];
 static Common_FlagState_e ESP8266_FirstDataSuccessFlag = 0;
+static CircularBuffer_s ESP8266CommandBuffer = { 0 };
+static char ESP8266_GetDataSendBuffer[200] = { 0 };
+static Common_FlagState_e ESP8266_DebugEnableFlag = FLAG_RESET;
 
-CircularBuffer_s ESP8266CommandBuffer = { 0 };
 
 typedef enum _ESP_GetWeatherDataSteps_e
 {
@@ -67,7 +68,6 @@ static uint8_t ESP8266SendData(char *DataToSend, uint8_t *RxDataFlag);
 static uint8_t ESP8266ReceiveData(char *ReceiveBuffer, uint16_t ByteNumberToReceive);
 static void ESPReceiveBufferClean(char *Buffer, uint16_t BufferSize);
 
-static char ESP8266_GetDataSendBuffer[200] = { 0 };
 
 void ESP8266_Init(void)
 {
@@ -82,7 +82,7 @@ uint8_t ESP8266PrepareModule(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTim
     StateMachineData.StepErrorTimer = StepErrorTimer;
     static uint16_t CorrectCounter = 0;
 
-    if(DebugTimer->TimerValue % 200 == 0)
+    if(DebugTimer->TimerValue % 200 == 0 && ESP8266_DebugEnableFlag == FLAG_SET)
     {
         FrontEndDrawDebugInfo(StateMachineData.CurrentState, 0, 30);
         FrontEndDrawDebugInfo(StateMachineData.StepErrorCounter, 40, 30);
@@ -133,8 +133,8 @@ uint8_t ESP8266PrepareModule(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTim
 
     case GetDataCurrentWeather:
         Common_ArrayClean(ESP8266_GetDataSendBuffer, 200);
-        sprintf(ESP8266_GetDataSendBuffer, "GET https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric",
-                SDCardConfig_GetLocalisationCITY(), SDCardConfig_GetAPIKEY());
+        sprintf(ESP8266_GetDataSendBuffer, "GET https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", SDCardConfig_GetLocalisationCITY(),
+                SDCardConfig_GetAPIKEY());
         ESP8266_GetData(ESP8266_GetDataSendBuffer, Forecast, 1000, &CurrentWeatherDataParse, &StateMachineData);
         break;
 
@@ -572,5 +572,17 @@ void ESP8266_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         ;
     }
     status = status;
+}
+
+void ESP8266_ToggleDebugFlag(void)
+{
+    if(ESP8266_DebugEnableFlag == FLAG_RESET)
+    {
+        ESP8266_DebugEnableFlag = FLAG_SET;
+    }
+    else if(ESP8266_DebugEnableFlag == FLAG_SET)
+    {
+        ESP8266_DebugEnableFlag = FLAG_RESET;
+    }
 }
 

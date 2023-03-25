@@ -45,5 +45,6 @@ uint8_t ESP8266PrepareModule(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTim
 void ESP8266_SetFirstDataSuccessFlag(Common_FlagState_e FlagState);
 Common_FlagState_e ESP8266_GetFirstDataSuccessFlag(void);
 void ESP8266_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
+void ESP8266_ToggleDebugFlag(void);
 
 #endif /* INC_ESP8266_H_ */
