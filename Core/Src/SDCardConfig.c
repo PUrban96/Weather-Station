@@ -11,41 +11,52 @@
 #include "SDCardConfig.h"
 #include <string.h>
 #include "Common.h"
+#include "SystemState.h"
+#include "sdcard.h"
 
 static const char SDCardConfig_Network_FileName[] = "network.txt";
 static const char SDCardConfig_Apikey_FileName[] = "apikey.txt";
 static const char SDCardConfig_Localisation_FileName[] = "locdata.txt";
 
- static char SDCardConfig_SSID[30] = { 0 };
- static char SDCardConfig_PASS[30] = { 0 };
- static char SDCardConfig_APIKEY[40] = { 0 };
- static char SDCardConfig_CITY[30] = { 0 };
- static char SDCardConfig_LATITUDE[30] = { 0 };
- static char SDCardConfig_LONGITUDE[30] = { 0 };
+static char SDCardConfig_SSID[30] = { 0 };
+static char SDCardConfig_PASS[30] = { 0 };
+static char SDCardConfig_APIKEY[40] = { 0 };
+static char SDCardConfig_CITY[30] = { 0 };
+static char SDCardConfig_LATITUDE[30] = { 0 };
+static char SDCardConfig_LONGITUDE[30] = { 0 };
 
- static char SDCardCOnfig_ReadBuffer[SDCARDCONFIG_READ_BUFFER_SIZE] = {0};
+static char SDCardCOnfig_ReadBuffer[SDCARDCONFIG_READ_BUFFER_SIZE] = { 0 };
 
- static SDConfig_Result_e SDCardConfig_ReadNetwork(void);
- static SDConfig_Result_e SDCardConfig_ReadApikey(void);
- static SDConfig_Result_e SDCardConfig_ReadLocalisation(void);
- static void SDCardConfig_GetParametersValue(const char *InputData, const char *ParameterNameIn, char *ParamaterValueOut);
+static SDConfig_Result_e SDCardConfig_ReadNetwork(void);
+static SDConfig_Result_e SDCardConfig_ReadApikey(void);
+static SDConfig_Result_e SDCardConfig_ReadLocalisation(void);
+static void SDCardConfig_GetParametersValue(const char *InputData, const char *ParameterNameIn, char *ParamaterValueOut);
 
- /* Init */
- /* ******************************************************************************* */
- SDConfig_Result_e SDCardConfig_ReadConfig(void)
- {
-     SDConfig_Result_e status = SDCONFIG_OK;
+/* Init */
+/* ******************************************************************************* */
+void SDCardConfig_Init(void)
+{
+    /* Increase speed after SD Card initialization */
+    SDCARD_SPI_PORT.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+    HAL_SPI_Init(&hspi2);
 
-     SDCardConfig_ReadNetwork();
-     SDCardConfig_ReadApikey();
-     SDCardConfig_ReadLocalisation();
+    SDCardConfig_ReadConfig();
+}
 
-     return status;
- }
- /* ******************************************************************************* */
+SDConfig_Result_e SDCardConfig_ReadConfig(void)
+{
+    SDConfig_Result_e status = SDCONFIG_OK;
 
- /* Config read function */
- /* ******************************************************************************* */
+    SDCardConfig_ReadNetwork();
+    SDCardConfig_ReadApikey();
+    SDCardConfig_ReadLocalisation();
+
+    return status;
+}
+/* ******************************************************************************* */
+
+/* Config read function */
+/* ******************************************************************************* */
 static SDConfig_Result_e SDCardConfig_ReadNetwork(void)
 {
     FATFS fs;
@@ -136,7 +147,6 @@ static SDConfig_Result_e SDCardConfig_ReadLocalisation(void)
     return status;
 }
 /* ******************************************************************************* */
-
 
 /* Config write function */
 /* ******************************************************************************* */
@@ -261,7 +271,6 @@ char* SDCardConfig_GetLocalisationLONGITUDE()
     return SDCardConfig_LONGITUDE;
 }
 /* ******************************************************************************* */
-
 
 static void SDCardConfig_GetParametersValue(const char *InputData, const char *ParameterNameIn, char *ParamaterValueOut)
 {

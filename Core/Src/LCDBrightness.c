@@ -10,12 +10,14 @@
 #include "LCDBrightness.h"
 #include "SoftwareTimers.h"
 
+/* Variable */
+/* ******************************************************************************** */
 static uint32_t FotoSensorADCRaw = 0;
 static uint16_t FotoSensorMeasNumber = 0;
 static uint64_t FotoSensorAverage = 0;
+/* ******************************************************************************** */
 
-
-void LCDBrightnessInit(void)
+void LCDBrightness_Init(void)
 {
     HAL_TIM_PWM_Start(&LCD_PWM_TIMER, LCD_PWM_CHANNEL);
     __HAL_TIM_SET_COMPARE(&LCD_PWM_TIMER, LCD_PWM_CHANNEL, 20);
@@ -26,7 +28,7 @@ void LCDBrightnessInit(void)
     HAL_ADC_PollForConversion(&FOTOSENSOR_ADC_HANDLER, HAL_MAX_DELAY);
 }
 
-void LCDBrightnessControl(SoftwareTimer *SWTimer)
+void LCDBrightness_BrightnessControl(SoftwareTimer *SWTimer)
 {
     if(SWTimer->TimerValue >= LCD_BRIGHTNESS_PERIOD)
     {

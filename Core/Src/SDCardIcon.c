@@ -12,23 +12,17 @@
 #include "ILI9341_STM32_Driver.h"
 #include "ILI9341_GFX.h"
 
+/* Variable */
+/* ******************************************************************************** */
 static BYTE SDCardIconRowBuffer[ROW_BUFFER_SIZE];
+/* ******************************************************************************** */
 
+/* Function declaration */
+/* ******************************************************************************** */
 static inline uint8_t AcsiiToIntConverterCalc(char AsciiSign);
 static inline uint8_t SDCardAsciiToInt(char AsciiSignHigh, char AsciiSignLow);
 static inline void SDCardConvertLine(uint16_t widht, uint16_t LineAmount);
-
-void SDCardIconInit(void)
-{
-    FATFS fs;
-    FRESULT res;
-
-    res = f_mount(&fs, "", 0);
-    if(res != FR_OK)
-    {
-        ;
-    }
-}
+/* ******************************************************************************** */
 
 uint8_t SDCardReadIcon(char *FileName, uint8_t Orientation, uint16_t X1, uint16_t Y1, uint16_t widht, uint16_t height)
 {

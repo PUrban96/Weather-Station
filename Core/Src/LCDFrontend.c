@@ -21,6 +21,8 @@
 #include "Common.h"
 #include "ESP8266Config.h"
 
+/* Function declaration */
+/* ******************************************************************************** */
 static void FrontendDrawDayName(char *DayName);
 static void FrontendDrawDate(char *Date);
 static void FrontendDrawTime(char *Time);
@@ -72,12 +74,15 @@ static void FrontendDrawLine(void);
 
 static void FrontendDrawWeatherIcon(char *WeatherIcon, uint16_t X1, uint16_t Y1);
 static void TemperatureWithoutFractionPart(const char *TemmperatureIn, char *TemperatureOut);
+/* ******************************************************************************** */
 
+/* Variable */
+/* ******************************************************************************** */
 static Common_FlagState_e LCDFrontendConfig_ReflashFlag = FLAG_RESET;
+static Common_FlagState_e LCDFrontend_ExtarnalInterfaceRefresh = FLAG_RESET;
+/* ******************************************************************************** */
 
-//uint8_t testBuffer[SD_CARD_ICON_SIZE];
-
-void FrontendInit(void)
+void LCDFrontend_Init(void)
 {
     //HAL_GPIO_WritePin(LCD_BRIGHTNESS_GPIO_Port, LCD_BRIGHTNESS_Pin, GPIO_PIN_SET);
     ILI9341_Init();
@@ -85,11 +90,11 @@ void FrontendInit(void)
     ILI9341_Set_Rotation(SCREEN_HORIZONTAL_1);
 }
 
-void FrontendDrawInterface(SoftwareTimer *SWTimer)
+void LCDFrontend_DrawInterface(SoftwareTimer *SWTimer)
 {
     static uint8_t CurrentMinutes = 0;
     //if(SWTimer->TimerValue >= LCD_FRONTEND_REFRESH_PERIOD)
-    if(GetActualMinutes() != CurrentMinutes)
+    if(GetActualMinutes() != CurrentMinutes || LCDFrontend_ExtarnalInterfaceRefresh == FLAG_SET)
     {
         CurrentMinutes = GetActualMinutes();
         ILI9341_Fill_Screen(BLACK);
@@ -144,6 +149,7 @@ void FrontendDrawInterface(SoftwareTimer *SWTimer)
         FrontendDrawLine();
 
         StartAndResetTimer(SWTimer);
+        LCDFrontend_ExtarnalInterfaceRefresh = FLAG_RESET;
     }
 }
 
@@ -174,6 +180,11 @@ void LCDFrontend_DrawConfigInterface(SoftwareTimer *SWTimer)
 void LCDFrontend_ConfigSetRefleshFlag(void)
 {
     LCDFrontendConfig_ReflashFlag = FLAG_SET;
+}
+
+void LCDFrontend_ExternalRefresh(void)
+{
+    LCDFrontend_ExtarnalInterfaceRefresh = FLAG_SET;
 }
 
 /* Date and time */

@@ -157,19 +157,13 @@ int main(void)
     Error_Handler();
   }
   /* USER CODE BEGIN 2 */
-
-    /* Increase speed after SD Card initialization */
-    hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
-    if(HAL_SPI_Init(&hspi2) != HAL_OK)
-    {
-        Error_Handler();
-    }
-
     HAL_TIM_Base_Start_IT(&htim6);
 
-    LCDBrightnessInit();
-    InsideSensorInit();
-    FrontendInit();
+    SDCardConfig_Init();
+    ESP8266_Init();
+    LCDBrightness_Init();
+    InsideSensor_Init();
+    LCDFrontend_Init();
 
     StartAndResetTimer(&InsideSensorTimer);
     StartAndResetTimer(&LCDFrontendTimer);
@@ -178,9 +172,6 @@ int main(void)
     StartAndResetTimer(&FotoSensorTimer);
     StartAndResetTimer(&ESPGetDataTimer);
     StartAndResetTimer(&LCDDebugTimer);
-
-    SDCardConfig_ReadConfig();
-    ESP8266_Init();
 
     HAL_GPIO_WritePin(SPI2_T_CS_GPIO_Port, SPI2_T_CS_Pin, GPIO_PIN_SET);
     __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
@@ -196,10 +187,10 @@ int main(void)
         {
             CheckActualDateAfterRestart();
             ReadDateAndTime(&RTCPeriodTimer);
-            InsideSensorSupport(&InsideSensorTimer);
-            FrontendDrawInterface(&LCDFrontendTimer);
+            InsideSensor_IndoorMeasurement(&InsideSensorTimer);
+            LCDFrontend_DrawInterface(&LCDFrontendTimer);
             ESP8266_MachineState(&ESPGetDataTimer, &ESPStepErrorTimer, &LCDDebugTimer);
-            LCDBrightnessControl(&LCDBrightnessTimer);
+            LCDBrightness_BrightnessControl(&LCDBrightnessTimer);
             //LCDFotoSensorMeas(&FotoSensorTimer);
             HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
         }
@@ -207,7 +198,7 @@ int main(void)
         {
             LCDFrontend_DrawConfigInterface(&LCDFrontendTimer);
             ESP8266Config_MachineState(&ESPGetDataTimer, &ESPStepErrorTimer, &LCDDebugTimer);
-            LCDBrightnessControl(&LCDBrightnessTimer);
+            LCDBrightness_BrightnessControl(&LCDBrightnessTimer);
             HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET);
         }
 

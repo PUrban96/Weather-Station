@@ -12,6 +12,8 @@
 #include "BMXX80.h"
 #include <stdlib.h>
 
+/* Variable */
+/* ******************************************************************************** */
 static float InsideTemperature = 0;
 static int32_t InsidePressure = 0;
 static float InsideHumidity = 0;
@@ -19,8 +21,9 @@ static float InsideHumidity = 0;
 static char InsideTemperatureString[6] = { 0 };
 static char InsidePresureString[6] = { 0 };
 static char InsideHumidityString[6] = { 0 };
+/* ******************************************************************************** */
 
-void InsideSensorSupport(SoftwareTimer *SWTimer)
+void InsideSensor_IndoorMeasurement(SoftwareTimer *SWTimer)
 {
     if(SWTimer->TimerValue >= INSIDE_SENSOR_PERIOD)
     {
@@ -29,7 +32,7 @@ void InsideSensorSupport(SoftwareTimer *SWTimer)
     }
 }
 
-void InsideSensorInit(void)
+void InsideSensor_Init(void)
 {
     //HAL_GPIO_WritePin(BME_POWER_GPIO_Port, BME_POWER_Pin, GPIO_PIN_SET);
     HAL_Delay(100);

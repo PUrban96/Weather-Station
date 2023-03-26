@@ -14,7 +14,7 @@
 typedef enum _System_State_e
 {
     SYSTEM_NORMAL,
-    SYSTEM_CONFIG
+    SYSTEM_CONFIG,
 }System_State_e;
 
 

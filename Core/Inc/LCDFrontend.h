@@ -18,10 +18,12 @@
 #define LCD_FRONTEND_REFRESH_PERIOD 10000 /* in milisecond */
 /* ******************************************************************************** */
 
-void FrontendDrawInterface(SoftwareTimer *SWTimer);
+void LCDFrontend_Init(void);
+void LCDFrontend_DrawInterface(SoftwareTimer *SWTimer);
 void LCDFrontend_DrawConfigInterface(SoftwareTimer *SWTimer);
+void LCDFrontend_DrawErrorInterface(SoftwareTimer *SWTimer);
 void LCDFrontend_ConfigSetRefleshFlag(void);
-void FrontendInit(void);
+void LCDFrontend_ExternalRefresh(void);
 
 void FrontEndDrawDebugInfo(uint32_t InfoToDraw, uint16_t X, uint16_t Y);
 

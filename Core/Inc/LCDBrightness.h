@@ -32,8 +32,8 @@ extern ADC_HandleTypeDef            FOTOSENSOR_ADC_HANDLER;
 #define FOTOSENSOR_PERIOD           10 /* in milisecond */
 /* ******************************************************************************** */
 
-void LCDBrightnessControl(SoftwareTimer *SWTimer);
-void LCDBrightnessInit(void);
+void LCDBrightness_BrightnessControl(SoftwareTimer *SWTimer);
+void LCDBrightness_Init(void);
 void LCDFotoSensorMeas(SoftwareTimer *SWTimer);
 
 #endif /* INC_LCDBRIGHTNESS_H_ */

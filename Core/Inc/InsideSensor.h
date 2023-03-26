@@ -20,8 +20,8 @@ extern I2C_HandleTypeDef I2C_HANDLER;
 #define INSIDE_SENSOR_PERIOD 10000 /* in milisecond */
 /* ******************************************************************************** */
 
-void InsideSensorSupport(SoftwareTimer *SWTimer);
-void InsideSensorInit(void);
+void InsideSensor_Init(void);
+void InsideSensor_IndoorMeasurement(SoftwareTimer *SWTimer);
 
 char *GetInsideTemperatureString(void);
 char *GetInsidePressureString(void);

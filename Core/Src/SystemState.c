@@ -20,3 +20,4 @@ void SystemState_SetState(System_State_e NewState)
 {
     SystemActualState = NewState;
 }
+

@@ -15,7 +15,6 @@
 #define ROW_BUFFER_SIZE           3600
 #define LINE_READ_AMOUNT            10
 
-void SDCardIconInit(void);
 uint8_t SDCardReadIcon(char *FileName, uint8_t Orientation, uint16_t X1, uint16_t Y1, uint16_t widht, uint16_t height);
 
 #endif /* INC_SDCARDICON_H_ */

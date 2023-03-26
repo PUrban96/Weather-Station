@@ -18,6 +18,7 @@
 #include "SoftwareTimers.h"
 #include "SystemState.h"
 #include "ESP8266ConfigParser.h"
+#include "LCDFrontend.h"
 
 /* TypeDef */
 /* ******************************************************************************** */
@@ -77,6 +78,7 @@ static ESP8266_StepStatus_e ESP8266Config_GetData(ESP8266Config_StateMachineData
 
 static void ESP8266Config_ModuleNexStep(ESP8266Config_StateMachineData_s *MachineState);
 static void ESP8266Config_TotalError(ESP8266Config_StateMachineData_s *MachineState);
+static void ESP8266Config_ExitConfig(ESP8266Config_StateMachineData_s *MachineState);
 static HAL_StatusTypeDef ESP8266Config_SendData(const char *DataToSend, uint8_t *RxDataFlag);
 static void ESP8266Config_ReceiveBufferClean(char *Buffer, uint16_t BufferSize);
 /* ******************************************************************************** */
@@ -177,10 +179,11 @@ void ESP8266Config_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepError
         ESP8266Config_StateMachineData.CurrentState = CFG_ModuleStart;
         StartAndResetTimer(ESP8266Config_StateMachineData.SWTimer);
         ResetTimer(StepErrorTimer);
+        LCDFrontend_ExternalRefresh();
         break;
     }
-
     }
+    ESP8266Config_ExitConfig(&ESP8266Config_StateMachineData);
 }
 
 static ESP8266_StepStatus_e ESP8266Config_ModuleStart(ESP8266Config_StateMachineData_s *MachineState)
@@ -418,6 +421,14 @@ static void ESP8266Config_TotalError(ESP8266Config_StateMachineData_s *MachineSt
     StartAndResetTimer(MachineState->SWTimer);
     (MachineState->TotalErrorCounter)++;
     MachineState->RxState = ESPReceiveIdle;
+}
+
+static void ESP8266Config_ExitConfig(ESP8266Config_StateMachineData_s *MachineState)
+{
+    if(HAL_GPIO_ReadPin(BUTTON_2_GPIO_Port, BUTTON_2_Pin) == GPIO_PIN_RESET)
+    {
+        (MachineState->CurrentState) = CFG_Return_Reset;
+    }
 }
 
 static HAL_StatusTypeDef ESP8266Config_SendData(const char *DataToSend, uint8_t *RxDataFlag)
