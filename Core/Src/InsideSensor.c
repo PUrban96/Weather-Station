@@ -16,9 +16,9 @@ static float InsideTemperature = 0;
 static int32_t InsidePressure = 0;
 static float InsideHumidity = 0;
 
-char InsideTemperatureString[6] = { 0, 0, 0, 0, 0, 0 };
-char InsidePresureString[6] = { 0, 0, 0, 0, 0, 0 };
-char InsideHumidityString[6] = { 0, 0, 0, 0, 0, 0 };
+static char InsideTemperatureString[6] = { 0 };
+static char InsidePresureString[6] = { 0 };
+static char InsideHumidityString[6] = { 0 };
 
 void InsideSensorSupport(SoftwareTimer *SWTimer)
 {

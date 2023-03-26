@@ -81,6 +81,5 @@ void ILI9341_Draw_Vertical_Line(uint16_t X, uint16_t Y, uint16_t Height, uint16_
 
 void ILI9341_Draw_Line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t Colour);
 
-void ILI9341_Draw_Wind_Direction(double Degree,uint16_t Colour);
 
 #endif /* INC_ILI9341_STM32_DRIVER_H_ */

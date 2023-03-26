@@ -41,7 +41,7 @@ typedef enum _ESP_ReceiveDataState_e
 /* ******************************************************************************** */
 
 void ESP8266_Init(void);
-uint8_t ESP8266PrepareModule(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer, SoftwareTimer *DebugTimer);
+void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer, SoftwareTimer *DebugTimer);
 void ESP8266_SetFirstDataSuccessFlag(Common_FlagState_e FlagState);
 Common_FlagState_e ESP8266_GetFirstDataSuccessFlag(void);
 void ESP8266_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);

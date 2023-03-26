@@ -18,13 +18,8 @@
 #include "CircularBuffer.h"
 #include "SDCardConfig.h"
 
-static char Forecast[17000];
-static Common_FlagState_e ESP8266_FirstDataSuccessFlag = 0;
-static CircularBuffer_s ESP8266CommandBuffer = { 0 };
-static char ESP8266_GetDataSendBuffer[200] = { 0 };
-static Common_FlagState_e ESP8266_DebugEnableFlag = FLAG_RESET;
-
-
+/* TypeDef */
+/* ******************************************************************************** */
 typedef enum _ESP_GetWeatherDataSteps_e
 {
     ModuleStart, ClientMode, ConnectNetwork, Cipmux,
@@ -46,11 +41,25 @@ typedef struct _ESP8266_StateMachineData_s
     ESP_GetWeatherDataSteps_e CurrentState;
     ESP_ReceiveDataState_e RxState;
 } ESP8266_StateMachineData_s;
+/* ******************************************************************************** */
 
-ESP8266_StateMachineData_s StateMachineData = { 0 };
+/* Variable */
+/* ******************************************************************************** */
+static ESP8266_StateMachineData_s StateMachineData = { 0 };
+static char Forecast[17000];
+static Common_FlagState_e ESP8266_FirstDataSuccessFlag = 0;
+static CircularBuffer_s ESP8266CommandBuffer = { 0 };
+static char ESP8266_GetDataSendBuffer[200] = { 0 };
+static Common_FlagState_e ESP8266_DebugEnableFlag = FLAG_RESET;
+/* ******************************************************************************** */
 
+/* Function pointer - parser callback */
+/* ******************************************************************************** */
 typedef void (*DataParser_funptr)(const char*);
+/* ******************************************************************************** */
 
+/* Function declaration */
+/* ******************************************************************************** */
 static ESP8266_StepStatus_e ESP826_ModuleStart(ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_ClientMode(ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_ConnectNetwork(ESP8266_StateMachineData_s *MachineState);
@@ -67,7 +76,7 @@ static void ESP8266_TotalError(ESP8266_StateMachineData_s *MachineState);
 static uint8_t ESP8266SendData(char *DataToSend, uint8_t *RxDataFlag);
 static uint8_t ESP8266ReceiveData(char *ReceiveBuffer, uint16_t ByteNumberToReceive);
 static void ESPReceiveBufferClean(char *Buffer, uint16_t BufferSize);
-
+/* ******************************************************************************** */
 
 void ESP8266_Init(void)
 {
@@ -76,7 +85,7 @@ void ESP8266_Init(void)
     status = status;
 }
 
-uint8_t ESP8266PrepareModule(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer, SoftwareTimer *DebugTimer)
+void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer, SoftwareTimer *DebugTimer)
 {
     StateMachineData.SWTimer = SWTimer;
     StateMachineData.StepErrorTimer = StepErrorTimer;
@@ -172,7 +181,6 @@ uint8_t ESP8266PrepareModule(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTim
         break;
 
     }
-    return 0;
 }
 
 static ESP8266_StepStatus_e ESP826_ModuleStart(ESP8266_StateMachineData_s *MachineState)
@@ -559,19 +567,20 @@ void ESP8266_SetFirstDataSuccessFlag(Common_FlagState_e FlagState)
 
 void ESP8266_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-    HAL_StatusTypeDef status = 0;
-
-    if(StateMachineData.CurrentState != GetData && StateMachineData.CurrentState != GetDataCurrentWeather && StateMachineData.CurrentState != GetDataForecast)
+    if(huart->Instance == USART2)
     {
-        CircularBuffer_AddToBuffer(&ESP8266CommandBuffer, StateMachineData.ESPCommandReceiveBuffer, Size);
-        status = HAL_UARTEx_ReceiveToIdle_DMA(&UART_HANDLER, (uint8_t*) StateMachineData.ESPCommandReceiveBuffer, 1);
+        if(StateMachineData.CurrentState != GetData && StateMachineData.CurrentState != GetDataCurrentWeather
+                && StateMachineData.CurrentState != GetDataForecast)
+        {
+            CircularBuffer_AddToBuffer(&ESP8266CommandBuffer, StateMachineData.ESPCommandReceiveBuffer, Size);
+            HAL_UARTEx_ReceiveToIdle_DMA(&UART_HANDLER, (uint8_t*) StateMachineData.ESPCommandReceiveBuffer, 1);
+        }
+        else
+        {
+            //status =  HAL_UARTEx_ReceiveToIdle_DMA(&UART_HANDLER, (uint8_t *)StateMachineData.ESPCommandReceiveBuffer, 1);
+            ;
+        }
     }
-    else
-    {
-        //status =  HAL_UARTEx_ReceiveToIdle_DMA(&UART_HANDLER, (uint8_t *)StateMachineData.ESPCommandReceiveBuffer, 1);
-        ;
-    }
-    status = status;
 }
 
 void ESP8266_ToggleDebugFlag(void)

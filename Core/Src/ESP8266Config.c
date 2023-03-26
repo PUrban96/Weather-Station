@@ -26,10 +26,10 @@ typedef enum _ESP8266Config_MachineState_e
     CFG_ModuleStart,
     CFG_AccesPoint,
     CFG_SetIP,
-    CFG_LimitTime,
     CFG_NetworkParam,
     CFG_MultiConnect,
     CFG_StartServer,
+    CFG_LimitTime,
     CFG_WaitForConnect,
     CFG_SendServer,
     CFG_SendConfigPage,
@@ -53,17 +53,17 @@ typedef struct _ESP8266_StateMachineData_s
 /* Variable */
 /* ******************************************************************************** */
 static ESP8266Config_StateMachineData_s ESP8266Config_StateMachineData = { 0 };
-CircularBuffer_s ESP8266Config_CommandBuffer = { 0 };
+static CircularBuffer_s ESP8266Config_CommandBuffer = { 0 };
 /* ******************************************************************************** */
 
 /* Config variable */
 /* ******************************************************************************** */
-uint16_t ESP8266Config_ServerResponseTimeout = 300; /* in seconds */
-char ESP8266Config_IPAddress[] = "192.168.8.1";
-char ESP8266Config_WifiSSID[] = "WeatherStation";
-char ESP8266Config_WifiPassword[] = "WeatherConfig";
-uint8_t ESP8266Config_Channel = 5;
-ESP8266Config_PassType ESP8266Config_PasswordType = ESP_AP_WPA_WPA2_PSK;
+static uint16_t ESP8266Config_ServerResponseTimeout = 350; /* in seconds */
+static char ESP8266Config_IPAddress[] = "192.168.8.1";
+static char ESP8266Config_WifiSSID[] = "WeatherStation";
+static char ESP8266Config_WifiPassword[] = "WeatherConfig";
+static uint8_t ESP8266Config_Channel = 5;
+static ESP8266Config_PassType ESP8266Config_PasswordType = ESP_AP_WPA_WPA2_PSK;
 /* ******************************************************************************** */
 
 /* Function declaration */
@@ -77,7 +77,7 @@ static ESP8266_StepStatus_e ESP8266Config_GetData(ESP8266Config_StateMachineData
 
 static void ESP8266Config_ModuleNexStep(ESP8266Config_StateMachineData_s *MachineState);
 static void ESP8266Config_TotalError(ESP8266Config_StateMachineData_s *MachineState);
-static uint8_t ESP8266Config_SendData(const char *DataToSend, uint8_t *RxDataFlag);
+static HAL_StatusTypeDef ESP8266Config_SendData(const char *DataToSend, uint8_t *RxDataFlag);
 static void ESP8266Config_ReceiveBufferClean(char *Buffer, uint16_t BufferSize);
 /* ******************************************************************************** */
 
@@ -109,17 +109,6 @@ void ESP8266Config_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepError
         break;
     }
 
-    case CFG_LimitTime:
-    {
-        /*
-        char DataToSend[50] = { 0 };
-        sprintf(DataToSend, "AT+CIPSTO=%d\r\n", (int) ESP8266Config_ServerResponseTimeout);
-        ESP8266Config_NextStateProcess(&ESP8266Config_StateMachineData, DataToSend);
-        */
-        ESP8266Config_StateMachineData.CurrentState++;
-        break;
-    }
-
     case CFG_NetworkParam:
     {
         char DataToSend[50] = { 0 };
@@ -138,6 +127,14 @@ void ESP8266Config_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepError
     case CFG_StartServer:
     {
         ESP8266Config_NextStateProcess(&ESP8266Config_StateMachineData, "AT+CIPSERVER=1,80\r\n");
+        break;
+    }
+
+    case CFG_LimitTime:
+    {
+        char DataToSend[50] = { 0 };
+        sprintf(DataToSend, "AT+CIPSTO=%d\r\n", (int) ESP8266Config_ServerResponseTimeout);
+        ESP8266Config_NextStateProcess(&ESP8266Config_StateMachineData, DataToSend);
         break;
     }
 
@@ -178,6 +175,8 @@ void ESP8266Config_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepError
         ESP8266Config_SendData("AT+RST\r\n", NULL);
         SystemState_SetState(SYSTEM_NORMAL);
         ESP8266Config_StateMachineData.CurrentState = CFG_ModuleStart;
+        StartAndResetTimer(ESP8266Config_StateMachineData.SWTimer);
+        ResetTimer(StepErrorTimer);
         break;
     }
 
@@ -193,6 +192,9 @@ static ESP8266_StepStatus_e ESP8266Config_ModuleStart(ESP8266Config_StateMachine
         HAL_UART_MspInit(&UART_HANDLER);
         ESP8266Config_ReceiveBufferClean(MachineState->ESPCommandReceiveBuffer, ESP8266CONFIG_RECEIVE_BUFFER_SIZE);
         CircularBuffer_FlushBuffer(&ESP8266Config_CommandBuffer);
+        HAL_GPIO_WritePin(ESP_SW_GPIO_Port, ESP_SW_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(ESP_RST_GPIO_Port, ESP_RST_Pin, GPIO_PIN_RESET);
+        HAL_Delay(500);
         HAL_GPIO_WritePin(ESP_SW_GPIO_Port, ESP_SW_Pin, GPIO_PIN_SET);
         HAL_GPIO_WritePin(ESP_RST_GPIO_Port, ESP_RST_Pin, GPIO_PIN_SET);
         HAL_Delay(500);
@@ -418,7 +420,7 @@ static void ESP8266Config_TotalError(ESP8266Config_StateMachineData_s *MachineSt
     MachineState->RxState = ESPReceiveIdle;
 }
 
-static uint8_t ESP8266Config_SendData(const char *DataToSend, uint8_t *RxDataFlag)
+static HAL_StatusTypeDef ESP8266Config_SendData(const char *DataToSend, uint8_t *RxDataFlag)
 {
     HAL_StatusTypeDef SendDataStatus = 0;
 //SendDataStatus = HAL_UART_Transmit_DMA(&UART_HANDLER, (uint8_t*) DataToSend, strlen(DataToSend));

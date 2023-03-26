@@ -12,7 +12,7 @@
 #include "ILI9341_STM32_Driver.h"
 #include "ILI9341_GFX.h"
 
-BYTE SDCardIconRowBuffer[ROW_BUFFER_SIZE];
+static BYTE SDCardIconRowBuffer[ROW_BUFFER_SIZE];
 
 static inline uint8_t AcsiiToIntConverterCalc(char AsciiSign);
 static inline uint8_t SDCardAsciiToInt(char AsciiSignHigh, char AsciiSignLow);

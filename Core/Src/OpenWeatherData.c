@@ -15,35 +15,48 @@
 #include <stdlib.h>
 #include "Common.h"
 
-char AirQualityIndex[2] = "5";
-char CurrentWeatherPressure[5] = "0";
-char CurrentWeatherHumidity[4] = "0";
-char CurrentWeatherTemperature[6] = "0";
-char CurrentWeatherRain1h[6] = "0";
-char CurrentWeatherSunrise[12] = "00:00";
-char CurrentWeatherSunset[12] = "00:00";
-char CurrentWeatherWindSpeed[6] = "0";
-char CurrentWeatherWindDegree[6] = "0";
-char CurrentWeatherWindCloudness[4] = "0";
-char CurrentWeatherWindVisibility[6] = "0";
-char CurrentWeatherIcon[4] = "01d";
-char CurrentWeatherActualDate[12] = "00:00";
+enum
+{
+    NextDay1 = 1,
+    NextDay2 = 2,
+    NextDay3 = 3
+};
 
-char Forecast_Day1_TemperatureDay[6] = "0";
-char Forecast_Day1_TemperatureNight[6] = "0";
-char Forecast_Day1_Icon[4] = "01d";
+/* Variable */
+/* ******************************************************************************** */
+static char AirQualityIndex[2] = "5";
+static char CurrentWeatherPressure[5] = "0";
+static char CurrentWeatherHumidity[4] = "0";
+static char CurrentWeatherTemperature[6] = "0";
+static char CurrentWeatherRain1h[6] = "0";
+static char CurrentWeatherSunrise[12] = "00:00";
+static char CurrentWeatherSunset[12] = "00:00";
+static char CurrentWeatherWindSpeed[6] = "0";
+static char CurrentWeatherWindDegree[6] = "0";
+static char CurrentWeatherWindCloudness[4] = "0";
+static char CurrentWeatherWindVisibility[6] = "0";
+static char CurrentWeatherIcon[4] = "01d";
+static char CurrentWeatherActualDate[12] = "00:00";
 
-char Forecast_Day2_TemperatureDay[6] = "0";
-char Forecast_Day2_TemperatureNight[6] = "0";
-char Forecast_Day2_Icon[4] = "01d";
+static char Forecast_Day1_TemperatureDay[6] = "0";
+static char Forecast_Day1_TemperatureNight[6] = "0";
+static char Forecast_Day1_Icon[4] = "01d";
 
-char Forecast_Day3_TemperatureDay[6] = "0";
-char Forecast_Day3_TemperatureNight[6] = "0";
-char Forecast_Day3_Icon[4] = "01d";
+static char Forecast_Day2_TemperatureDay[6] = "0";
+static char Forecast_Day2_TemperatureNight[6] = "0";
+static char Forecast_Day2_Icon[4] = "01d";
 
+static char Forecast_Day3_TemperatureDay[6] = "0";
+static char Forecast_Day3_TemperatureNight[6] = "0";
+static char Forecast_Day3_Icon[4] = "01d";
+/* ******************************************************************************** */
+
+/* Function declaration */
+/* ******************************************************************************** */
 static void GetWeatherDataFormJSON(const char *JSONWeatherData, const char *ParameterName, char *JSONParamaterValueOut, uint8_t DataType);
 static void GetForecastDataFormJSON(const char *JSONWeatherData, const char *ParameterName, char *JSONParamaterValueOut, uint8_t DataType,
         uint8_t NextDayNumber, const char *ForecastHour);
+/* ******************************************************************************** */
 
 void AirPollutionDataParse(const char *AirPollutionJSON)
 {

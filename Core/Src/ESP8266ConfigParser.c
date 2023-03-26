@@ -15,6 +15,8 @@
 #include "SDCardConfig.h"
 #include <stdlib.h>
 
+/* Variable */
+/* ******************************************************************************** */
 static char ESP8266Config_SSID[30] = { 0 };
 static char ESP8266Config_PASS[30] = { 0 };
 static char ESP8266Config_APIKEY[40] = { 0 };
@@ -22,10 +24,13 @@ static char ESP8266Config_CITY[30] = { 0 };
 static char ESP8266Config_LATITUDE[30] = { 0 };
 static char ESP8266Config_LONGITUDE[30] = { 0 };
 static char ESP8266Config_DATE[30] = { 0 };
+/* ******************************************************************************** */
 
+/* Function declaration */
+/* ******************************************************************************** */
 static void ESP8266ConfigParser_GetParametersValue(const char *InputData, const char *JSONParameterNameIn, char *JSONParamaterValueOut);
 static void ESP8266ConfigParser_SetDateAndTime(char *InputDate);
-
+/* ******************************************************************************** */
 
 void ESP8266ConfigParser_ParseData(const char *InputData)
 {

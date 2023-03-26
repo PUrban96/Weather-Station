@@ -198,7 +198,7 @@ int main(void)
             ReadDateAndTime(&RTCPeriodTimer);
             InsideSensorSupport(&InsideSensorTimer);
             FrontendDrawInterface(&LCDFrontendTimer);
-            ESP8266PrepareModule(&ESPGetDataTimer, &ESPStepErrorTimer, &LCDDebugTimer);
+            ESP8266_MachineState(&ESPGetDataTimer, &ESPStepErrorTimer, &LCDDebugTimer);
             LCDBrightnessControl(&LCDBrightnessTimer);
             //LCDFotoSensorMeas(&FotoSensorTimer);
             HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);

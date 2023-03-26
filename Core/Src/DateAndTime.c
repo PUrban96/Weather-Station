@@ -15,16 +15,16 @@
 #include "ESP8266.h"
 #include "OpenWeatherData.h"
 
-RTC_TimeTypeDef RtcTime;
-RTC_DateTypeDef RtcDate;
+static RTC_TimeTypeDef RtcTime;
+static RTC_DateTypeDef RtcDate;
 
-char TimeString[10];
-char DateString[15];
-char DayString[12];
+static char TimeString[10];
+static char DateString[15];
+static char DayString[12];
 
-char Next_1_DayString[12];
-char Next_2_DayString[12];
-char Next_3_DayString[12];
+static char Next_1_DayString[12];
+static char Next_2_DayString[12];
+static char Next_3_DayString[12];
 
 static void NextDayString(char *NexDayString, uint8_t NextDayNumber);
 static uint8_t CalculateLeapYear(void);

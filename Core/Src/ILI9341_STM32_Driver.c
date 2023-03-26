@@ -524,20 +524,3 @@ int x = x1-x0;
    }
 }
 
-void ILI9341_Draw_Wind_Direction(double Degree,uint16_t Colour)
-{
-    volatile double x0 = 0;
-    volatile double y0 = 0;
-    volatile double x1 = 0;
-    volatile double y1 = 0;
-    volatile double suma = 0;
-
-    x1 = (20*sin(1.5707963268));
-    y1 = (20*cos(1.5707963268));
-
-    x0 = 40;
-    y0 = 40;
-
-    suma = x1+y1+x0+y0;
-    //ILI9341_Draw_Line(x0,y0,x1,y1,Colour);
-}

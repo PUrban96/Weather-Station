@@ -11,13 +11,6 @@
 #include "main.h"
 #include "stm32g0xx_hal.h"
 
-enum
-{
-    NextDay1 = 1,
-    NextDay2 = 2,
-    NextDay3 = 3
-};
-
 void AirPollutionDataParse(const char *AirPollutionJSON);
 char *GetAirQualityIndex(void);
 
