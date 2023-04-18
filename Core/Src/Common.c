@@ -18,7 +18,7 @@ void UnixTimeToHours(char *UinxTimestamp, char *OutputTime)
     time_t default_time = TimeStamp;
 
     (void) localtime_r(&default_time, &ts);
-    ts.tm_hour += 1;
+    ts.tm_hour += 2;
     strftime(OutputTime, 6 * sizeof(char), "%H:%M", &ts);
     ;
 }

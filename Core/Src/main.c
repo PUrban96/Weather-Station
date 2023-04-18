@@ -157,13 +157,12 @@ int main(void)
     Error_Handler();
   }
   /* USER CODE BEGIN 2 */
-    HAL_TIM_Base_Start_IT(&htim6);
-
-    SDCardConfig_Init();
+    SoftwareTimer_Init();
     ESP8266_Init();
     LCDBrightness_Init();
     InsideSensor_Init();
     LCDFrontend_Init();
+    SDCardConfig_Init();
 
     StartAndResetTimer(&InsideSensorTimer);
     StartAndResetTimer(&LCDFrontendTimer);
