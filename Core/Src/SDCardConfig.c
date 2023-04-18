@@ -41,7 +41,7 @@ void SDCardConfig_Init(void)
     SDCardConfig_ReadConfig();
 
     /* Increase speed after SD Card initialization */
-    SDCARD_SPI_PORT.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+    SDCARD_SPI_PORT.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
     HAL_SPI_Init(&hspi2);
 }
 
