@@ -87,7 +87,6 @@ SoftwareTimer ESPGetDataTimer = { 0 };
 
 SoftwareTimer LCDDebugTimer = { 0 };
 
-BYTE testBuffer[SD_CARD_ICON_SIZE];
 
 /* USER CODE END PV */
 

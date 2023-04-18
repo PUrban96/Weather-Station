@@ -36,11 +36,13 @@ static void SDCardConfig_GetParametersValue(const char *InputData, const char *P
 /* ******************************************************************************* */
 void SDCardConfig_Init(void)
 {
-    /* Increase speed after SD Card initialization */
-    SDCARD_SPI_PORT.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
     HAL_SPI_Init(&hspi2);
 
     SDCardConfig_ReadConfig();
+
+    /* Increase speed after SD Card initialization */
+    SDCARD_SPI_PORT.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+    HAL_SPI_Init(&hspi2);
 }
 
 SDConfig_Result_e SDCardConfig_ReadConfig(void)
