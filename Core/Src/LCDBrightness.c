@@ -33,12 +33,12 @@ void LCDBrightness_BrightnessControl(SoftwareTimer *SWTimer)
     if(SWTimer->TimerValue >= LCD_BRIGHTNESS_PERIOD)
     {
         FotoSensorADCRaw = HAL_ADC_GetValue(&FOTOSENSOR_ADC_HANDLER);
-        if(FotoSensorADCRaw <= 150)
+        if(FotoSensorADCRaw <= 200)
         {
             __HAL_TIM_SET_COMPARE(&LCD_PWM_TIMER, LCD_PWM_CHANNEL, LCD_PWM_MIN_VALUE);
         }
 
-        if(FotoSensorADCRaw > 150 && FotoSensorADCRaw < 2000)
+        if(FotoSensorADCRaw > 200 && FotoSensorADCRaw < 2000)
         {
             uint32_t PWMCalculate = (486 * FotoSensorADCRaw + 27027);
             PWMCalculate /= 10000;

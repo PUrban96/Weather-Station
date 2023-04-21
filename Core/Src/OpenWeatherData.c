@@ -75,7 +75,7 @@ void CurrentWeatherDataParse(const char *CurrentWeatherJSON)
     Common_ArrayClean(CurrentWeatherTemperature, 6);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "temp", CurrentWeatherTemperature, Int);
 
-    //Common_ArrayClean(CurrentWeatherRain1h, 6);
+    Common_ArrayClean(CurrentWeatherRain1h, 6);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "1h", CurrentWeatherRain1h, Int);
 
     Common_ArrayClean(CurrentWeatherSunset, 12);

@@ -20,7 +20,7 @@ extern TIM_HandleTypeDef            LCD_PWM_TIMER;
 
 #define LCD_BRIGHTNESS_PERIOD       200 /* in milisecond */
 
-#define LCD_PWM_MIN_VALUE           5
+#define LCD_PWM_MIN_VALUE           1
 #define LCD_PWM_MAX_VALUE           100
 /* ******************************************************************************** */
 
