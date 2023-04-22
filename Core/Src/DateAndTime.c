@@ -47,7 +47,7 @@ void ReadDateAndTime(SoftwareTimer *SWTimer)
 
 void CheckActualDateAfterRestart(void)
 {
-    if(ESP8266_GetFirstDataSuccessFlag() == FLAG_SET)
+    if(ESP8266_GetFirstDataSuccessFlag() == ESP_DATEFLAG_READY)
     {
         uint8_t Day = 0;
         uint8_t DayWeek = 0;
@@ -59,7 +59,7 @@ void CheckActualDateAfterRestart(void)
         Year = (1900 + Year) - 2000;
         DateTime_SetNewDate(Day, DayWeek, Month, Year);
 
-        ESP8266_SetFirstDataSuccessFlag(FLAG_RESET);
+        ESP8266_SetFirstDataSuccessFlag(ESP_DATEFLAG_SET);
     }
 }
 
@@ -118,9 +118,6 @@ char* GetDayString(void)
 
     switch(RtcDate.WeekDay)
     {
-    case 0:
-        memcpy(DayString, "Sunday", strlen("Sunday"));
-        break;
     case 1:
         memcpy(DayString, "Monday", strlen("Monday"));
         break;
@@ -138,6 +135,9 @@ char* GetDayString(void)
         break;
     case 6:
         memcpy(DayString, "Saturday", strlen("Saturday"));
+        break;
+    case 7:
+        memcpy(DayString, "Sunday", strlen("Sunday"));
         break;
 
     default:
