@@ -40,14 +40,14 @@ void ReadDateAndTime(SoftwareTimer *SWTimer)
     {
         HAL_RTC_GetTime(&RTC_HANDLER, &RtcTime, RTC_FORMAT_BIN);
         HAL_RTC_GetDate(&RTC_HANDLER, &RtcDate, RTC_FORMAT_BIN);
-        BackUpDate();
+        //BackUpDate();
         ResetTimer(SWTimer);
     }
 }
 
 void CheckActualDateAfterRestart(void)
 {
-    if(ESP8266_GetFirstDataSuccessFlag() == FLAG_SET)
+    if(ESP8266_GetFirstDataSuccessFlag() == ESP_DATEFLAG_READY)
     {
         uint8_t Day = 0;
         uint8_t DayWeek = 0;
@@ -59,7 +59,7 @@ void CheckActualDateAfterRestart(void)
         Year = (1900 + Year) - 2000;
         DateTime_SetNewDate(Day, DayWeek, Month, Year);
 
-        ESP8266_SetFirstDataSuccessFlag(FLAG_RESET);
+        ESP8266_SetFirstDataSuccessFlag(ESP_DATEFLAG_SET);
     }
 }
 
@@ -118,9 +118,6 @@ char* GetDayString(void)
 
     switch(RtcDate.WeekDay)
     {
-    case 0:
-        memcpy(DayString, "Sunday", strlen("Sunday"));
-        break;
     case 1:
         memcpy(DayString, "Monday", strlen("Monday"));
         break;
@@ -138,6 +135,9 @@ char* GetDayString(void)
         break;
     case 6:
         memcpy(DayString, "Saturday", strlen("Saturday"));
+        break;
+    case 7:
+        memcpy(DayString, "Sunday", strlen("Sunday"));
         break;
 
     default:
@@ -368,6 +368,54 @@ void RestoreDateFromBackupRegister(void)
 
         HAL_RTC_SetDate(&hrtc, &RtcDate, RTC_FORMAT_BIN);
     }
+}
+
+uint8_t DateAndTime_CalculateDayInWeek(int Date, int Month, int Year)
+{
+    //Zeller's formula
+    uint32_t YearWithCorrect = (Month < 3) ? (Year - 1) : Year;
+    uint32_t Correction = (Month < 3) ? 0 : 2;
+    int A = (23.0 * Month / 9.0);
+    int B = (YearWithCorrect / 4.0);
+    int C = (YearWithCorrect / 100.0);
+    int D = (YearWithCorrect / 400.0);
+    uint32_t DayNumberZeller = (A + Date + 4.0 + Year + B + C + D - Correction);
+    DayNumberZeller = DayNumberZeller % 7;
+
+    uint8_t SystemDayNumber = 0;
+
+    switch(DayNumberZeller)
+    {
+    case 0:
+        SystemDayNumber = 2;
+        break;
+
+    case 1:
+        SystemDayNumber = 3;
+        break;
+
+    case 2:
+        SystemDayNumber = 4;
+        break;
+
+    case 3:
+        SystemDayNumber = 5;
+        break;
+
+    case 4:
+        SystemDayNumber = 6;
+        break;
+
+    case 5:
+        SystemDayNumber = 0;
+        break;
+
+    case 6:
+        SystemDayNumber = 1;
+        break;
+    }
+
+    return SystemDayNumber;
 }
 
 static uint32_t CalculateDayNumber(uint8_t Date, uint8_t Month, uint8_t Year)

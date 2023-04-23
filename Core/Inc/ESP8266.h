@@ -38,12 +38,19 @@ typedef enum _ESP_ReceiveDataState_e
 {
     ESPReceiveIdle, ESPWaitForData
 } ESP_ReceiveDataState_e;
+
+typedef enum _ESP8266_DateFlag_e
+{
+    ESP_DATEFLAG_WAIT = 0,
+    ESP_DATEFLAG_READY,
+    ESP_DATEFLAG_SET
+}ESP8266_DateFlag_e;
 /* ******************************************************************************** */
 
 void ESP8266_Init(void);
 void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer, SoftwareTimer *DebugTimer);
-void ESP8266_SetFirstDataSuccessFlag(Common_FlagState_e FlagState);
-Common_FlagState_e ESP8266_GetFirstDataSuccessFlag(void);
+void ESP8266_SetFirstDataSuccessFlag(ESP8266_DateFlag_e FlagState);
+ESP8266_DateFlag_e ESP8266_GetFirstDataSuccessFlag(void);
 void ESP8266_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
 void ESP8266_ToggleDebugFlag(void);
 

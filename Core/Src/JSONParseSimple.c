@@ -61,6 +61,10 @@ void GetParametersValue(const char *InputJSON, const char *JSONParameterNameIn, 
         uint8_t ParameterLen = EndParameterPointer - StartParameterPointer;
         memcpy(JSONParamaterValueOut, StartParameterPointer, ParameterLen);
     }
+    else
+    {
+        memcpy(JSONParamaterValueOut, "0", sizeof(char));
+    }
 }
 
 void GetParametersValueForecast(const char *InputJSON, const char *JSONParameterNameIn, char *JSONParamaterValueOut, uint8_t DataType, uint8_t NextDayNumber,

@@ -94,6 +94,7 @@ static void ESP8266ConfigParser_SetDateAndTime(char *InputDate)
 
     Hour = atoi(InputDate + 11*sizeof(char));
     Minutes = atoi(InputDate + 16*sizeof(char));
+    DayWeek = DateAndTime_CalculateDayInWeek(Day, Month, 2000+Year);
     DateTime_SetNewTime(Hour, Minutes, 0);
     DateTime_SetNewDate(Day, DayWeek, Month, Year);
 

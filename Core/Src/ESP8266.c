@@ -47,7 +47,7 @@ typedef struct _ESP8266_StateMachineData_s
 /* ******************************************************************************** */
 static ESP8266_StateMachineData_s StateMachineData = { 0 };
 static char Forecast[17000];
-static Common_FlagState_e ESP8266_FirstDataSuccessFlag = 0;
+static ESP8266_DateFlag_e ESP8266_FirstDataSuccessFlag = ESP_DATEFLAG_WAIT;
 static CircularBuffer_s ESP8266CommandBuffer = { 0 };
 static char ESP8266_GetDataSendBuffer[200] = { 0 };
 static Common_FlagState_e ESP8266_DebugEnableFlag = FLAG_RESET;
@@ -164,7 +164,10 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
         if(status == ESP_STEP_OK)
         {
             CorrectCounter++;
-            ESP8266_FirstDataSuccessFlag = FLAG_SET;
+            if(ESP8266_FirstDataSuccessFlag == ESP_DATEFLAG_WAIT)
+            {
+                ESP8266_FirstDataSuccessFlag = ESP_DATEFLAG_READY;
+            }
             HAL_GPIO_WritePin(ESP_SW_GPIO_Port, ESP_SW_Pin, GPIO_PIN_RESET);
             HAL_GPIO_WritePin(ESP_RST_GPIO_Port, ESP_RST_Pin, GPIO_PIN_RESET);
             HAL_UART_MspDeInit(&UART_HANDLER);
@@ -555,12 +558,12 @@ static void ESPReceiveBufferClean(char *Buffer, uint16_t BufferSize)
 
 }
 
-Common_FlagState_e ESP8266_GetFirstDataSuccessFlag(void)
+ESP8266_DateFlag_e ESP8266_GetFirstDataSuccessFlag(void)
 {
     return ESP8266_FirstDataSuccessFlag;
 }
 
-void ESP8266_SetFirstDataSuccessFlag(Common_FlagState_e FlagState)
+void ESP8266_SetFirstDataSuccessFlag(ESP8266_DateFlag_e FlagState)
 {
     ESP8266_FirstDataSuccessFlag = FlagState;
 }
