@@ -38,6 +38,7 @@
 #include "SystemState.h"
 #include "ESP8266Config.h"
 #include "SDCardConfig.h"
+#include "ESP8266_NTP.h"
 
 /* USER CODE END Includes */
 
@@ -170,6 +171,8 @@ int main(void)
     StartAndResetTimer(&FotoSensorTimer);
     StartAndResetTimer(&ESPGetDataTimer);
     StartAndResetTimer(&LCDDebugTimer);
+
+    ESP8266NTP_SetTimeRequestFlag(FLAG_SET);
 
     HAL_GPIO_WritePin(SPI2_T_CS_GPIO_Port, SPI2_T_CS_Pin, GPIO_PIN_SET);
     __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
