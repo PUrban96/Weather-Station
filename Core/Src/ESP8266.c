@@ -56,6 +56,8 @@ static ESP8266_DateFlag_e ESP8266_FirstDataSuccessFlag = ESP_DATEFLAG_WAIT;
 static CircularBuffer_s ESP8266CommandBuffer = { 0 };
 static char ESP8266_GetDataSendBuffer[200] = { 0 };
 static Common_FlagState_e ESP8266_DebugEnableFlag = FLAG_RESET;
+
+static uint16_t DEBUG_NTCConnectTry = 0;
 /* ******************************************************************************** */
 
 /* Variable */
@@ -105,6 +107,7 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
     StateMachineData.SWTimer = SWTimer;
     StateMachineData.StepErrorTimer = StepErrorTimer;
     static uint16_t CorrectCounter = 0;
+    static uint16_t NTCConnectCorrect = 0;
 
     if(DebugTimer->TimerValue % 200 == 0 && ESP8266_DebugEnableFlag == FLAG_SET)
     {
@@ -112,6 +115,8 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
         FrontEndDrawDebugInfo(StateMachineData.StepErrorCounter, 40, 30);
         FrontEndDrawDebugInfo(StateMachineData.TotalErrorCounter, 180, 30);
         FrontEndDrawDebugInfo(CorrectCounter, 210, 30);
+        FrontEndDrawDebugInfo(DEBUG_NTCConnectTry, 180, 45);
+        FrontEndDrawDebugInfo(NTCConnectCorrect, 210, 45);
     }
 
     switch(StateMachineData.CurrentState)
@@ -210,6 +215,7 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
         ESP8266_StepStatus_e status = ESP8266_GetDataNTP(Forecast, 50, &StateMachineData);
         if(status == ESP_STEP_OK)
         {
+            NTCConnectCorrect++;
             HAL_GPIO_WritePin(ESP_SW_GPIO_Port, ESP_SW_Pin, GPIO_PIN_RESET);
             HAL_GPIO_WritePin(ESP_RST_GPIO_Port, ESP_RST_Pin, GPIO_PIN_RESET);
             HAL_UART_MspDeInit(&UART_HANDLER);
@@ -553,6 +559,7 @@ static ESP8266_StepStatus_e ESP8266_GetDataNTP(char *DataBuffer, uint16_t DataBu
 
         StartAndResetTimer(MachineState->StepErrorTimer);
         status = ESP_STEP_EXECUTE;
+        DEBUG_NTCConnectTry++;
     }
 
     if(MachineState->RxState == ESPWaitForData)

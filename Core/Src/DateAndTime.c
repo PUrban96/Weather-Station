@@ -14,6 +14,7 @@
 #include "Common.h"
 #include "ESP8266.h"
 #include "OpenWeatherData.h"
+#include "ESP8266_NTP.h"
 
 static RTC_TimeTypeDef RtcTime;
 static RTC_DateTypeDef RtcDate;
@@ -38,6 +39,11 @@ void ReadDateAndTime(SoftwareTimer *SWTimer)
         HAL_RTC_GetDate(&RTC_HANDLER, &RtcDate, RTC_FORMAT_BIN);
         //BackUpDate();
         ResetTimer(SWTimer);
+
+        if(RtcTime.Hours == 4 && RtcTime.Minutes == 0 && ESP8266NTP_GetTimeRequestFlag() == FLAG_RESET)
+        {
+            ESP8266NTP_SetTimeRequestFlag(FLAG_SET);
+        }
     }
 }
 

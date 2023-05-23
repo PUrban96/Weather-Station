@@ -21,6 +21,8 @@ static char ESP8266NTP_Port[] = "123";
 static char ESP8266NTP_Protocol[] = "UDP";
 
 static Common_FlagState_e ESP8266NTP_TimeRequestFlag = FLAG_RESET;
+static ESP8266NTP_TimeType_e ESP8266NTP_TimeType = NTP_DAYLIGHT_TIME;
+
 
 static bool ESP8266NTP_CalculateDateAndTime(char *ResponseBuffer, ESP8266NTP_DateAndTime_s *DateAndTime);
 static void ESP8266NTP_UnixTimeToDate(uint32_t UinxTimestamp, ESP8266NTP_DateAndTime_s *Date);
@@ -47,8 +49,9 @@ bool ESP8266_SetTime(char *ResponseBuffer)
     bool status = ESP8266NTP_CalculateDateAndTime(ResponseBuffer, &NTPTime);
     if(status == true)
     {
-        DateTime_SetNewDate(NTPTime.Day, NTPTime.DayWeek, NTPTime.Month, NTPTime.Year);
+        DateTime_SetNewDate(NTPTime.Day, NTPTime.DayWeek, NTPTime.Month+1, NTPTime.Year-100);
         DateTime_SetNewTime(NTPTime.Hour, NTPTime.Minute, NTPTime.Second);
+        ESP8266NTP_SetTimeRequestFlag(FLAG_RESET);
         return true;
     }
     else
@@ -65,8 +68,8 @@ static bool ESP8266NTP_CalculateDateAndTime(char *ResponseBuffer, ESP8266NTP_Dat
     char *StartParameters = strchr(ResponseBuffer, ':');
     if(StartParameters != NULL)
     {
-        uint16_t highWord = StartParameters[1] << 8 | StartParameters[2];
-        uint16_t lowWord = StartParameters[3] << 8 | StartParameters[4];
+        uint16_t highWord = StartParameters[41] << 8 | StartParameters[42];
+        uint16_t lowWord = StartParameters[43] << 8 | StartParameters[44];
 
         uint64_t NTPTime = highWord << 16 | lowWord; //NTP time (seconds since Jan 1 1900)
         uint32_t UnixTime = NTPTime - 2208988800UL; //UNIX Time (seconds since Jan 1 1970)
@@ -101,7 +104,7 @@ static void ESP8266NTP_UnixTimeToHour(uint32_t UinxTimestamp, ESP8266NTP_DateAnd
     time_t default_time = UinxTimestamp;
 
     (void) localtime_r(&default_time, &ts);
-    Time->Hour = ts.tm_hour;
+    Time->Hour = ts.tm_hour + ESP8266NTP_TimeType;
     Time->Minute = ts.tm_min;
     Time->Second = ts.tm_sec;
 }
