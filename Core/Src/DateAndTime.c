@@ -120,6 +120,9 @@ char* GetDayString(void)
 
     switch(RtcDate.WeekDay)
     {
+    case 0:
+        memcpy(DayString, "Sunday", strlen("Sunday"));
+        break;
     case 1:
         memcpy(DayString, "Monday", strlen("Monday"));
         break;
