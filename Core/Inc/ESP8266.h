@@ -25,7 +25,7 @@ extern UART_HandleTypeDef UART_HANDLER;
 //#define INSIDE_SENSOR_PERIOD 500 /* in milisecond */
 #define ESP8266_MAX_STEP_TIME 2500
 
-#define ESP8266_GET_DATA_PERIOD 1U /* in minute */
+#define ESP8266_GET_DATA_PERIOD 10U /* in minute */
 /* ******************************************************************************** */
 
 /* ******************************************************************************** */

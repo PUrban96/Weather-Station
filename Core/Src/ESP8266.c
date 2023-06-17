@@ -17,6 +17,7 @@
 #include "Common.h"
 #include "CircularBuffer.h"
 #include "SDCardConfig.h"
+#include "ESP8266_NTP.h"
 
 /* TypeDef */
 /* ******************************************************************************** */
@@ -28,7 +29,11 @@ typedef enum _ESP_GetWeatherDataSteps_e
 
     ConnectServer2, CipsendCurrentWeather, GetDataCurrentWeather,
 
-    ConnectServer3, CipsendForecast, GetDataForecast, WaitForTimer
+    ConnectServer3, CipsendForecast, GetDataForecast,
+
+    ConnectServerNTP, CipsendNTP, GetDataNTP,
+
+    WaitForTimer
 } ESP_GetWeatherDataSteps_e;
 
 typedef struct _ESP8266_StateMachineData_s
@@ -51,6 +56,15 @@ static ESP8266_DateFlag_e ESP8266_FirstDataSuccessFlag = ESP_DATEFLAG_WAIT;
 static CircularBuffer_s ESP8266CommandBuffer = { 0 };
 static char ESP8266_GetDataSendBuffer[200] = { 0 };
 static Common_FlagState_e ESP8266_DebugEnableFlag = FLAG_RESET;
+
+static uint16_t DEBUG_NTCConnectTry = 0;
+/* ******************************************************************************** */
+
+/* Variable */
+/* ******************************************************************************** */
+static char ESP866_OpenWeatherAddress[] = "192.241.167.16";
+static char ESP866_OpenWeatherPort[] = "80";
+static char ESP866_OpenWeatherProtocol[] = "TCP";
 /* ******************************************************************************** */
 
 /* Function pointer - parser callback */
@@ -65,8 +79,10 @@ static ESP8266_StepStatus_e ESP8266_ClientMode(ESP8266_StateMachineData_s *Machi
 static ESP8266_StepStatus_e ESP8266_ConnectNetwork(ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_Cipmux(ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_ConnectServer(ESP8266_StateMachineData_s *MachineState);
+static ESP8266_StepStatus_e ESP8266_ConnectServerNTP(ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_GetData(char *InputData, char *DataBuffer, uint16_t DataBufferLen, DataParser_funptr ParserCallback,
         ESP8266_StateMachineData_s *MachineState);
+static ESP8266_StepStatus_e ESP8266_GetDataNTP(char *DataBuffer, uint16_t DataBufferLen, ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_Cipsend(char *InputCipsend, ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_WaitForTimer(ESP8266_StateMachineData_s *MachineState);
 
@@ -74,6 +90,7 @@ static void ESP8266_ModuleNexStep(ESP8266_StateMachineData_s *MachineState);
 static void ESP8266_TotalError(ESP8266_StateMachineData_s *MachineState);
 
 static uint8_t ESP8266SendData(char *DataToSend, uint8_t *RxDataFlag);
+static uint8_t ESP8266SendDataByte(uint8_t *DataToSend, uint16_t DataLenght, uint8_t *RxDataFlag);
 static uint8_t ESP8266ReceiveData(char *ReceiveBuffer, uint16_t ByteNumberToReceive);
 static void ESPReceiveBufferClean(char *Buffer, uint16_t BufferSize);
 /* ******************************************************************************** */
@@ -90,6 +107,7 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
     StateMachineData.SWTimer = SWTimer;
     StateMachineData.StepErrorTimer = StepErrorTimer;
     static uint16_t CorrectCounter = 0;
+    static uint16_t NTCConnectCorrect = 0;
 
     if(DebugTimer->TimerValue % 200 == 0 && ESP8266_DebugEnableFlag == FLAG_SET)
     {
@@ -97,6 +115,8 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
         FrontEndDrawDebugInfo(StateMachineData.StepErrorCounter, 40, 30);
         FrontEndDrawDebugInfo(StateMachineData.TotalErrorCounter, 180, 30);
         FrontEndDrawDebugInfo(CorrectCounter, 210, 30);
+        FrontEndDrawDebugInfo(DEBUG_NTCConnectTry, 180, 45);
+        FrontEndDrawDebugInfo(NTCConnectCorrect, 210, 45);
     }
 
     switch(StateMachineData.CurrentState)
@@ -168,10 +188,39 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
             {
                 ESP8266_FirstDataSuccessFlag = ESP_DATEFLAG_READY;
             }
+
+            if(ESP8266NTP_GetTimeRequestFlag() == FLAG_RESET)
+            {
+                HAL_GPIO_WritePin(ESP_SW_GPIO_Port, ESP_SW_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(ESP_RST_GPIO_Port, ESP_RST_Pin, GPIO_PIN_RESET);
+                HAL_UART_MspDeInit(&UART_HANDLER);
+                StartAndResetTimer(StateMachineData.SWTimer);
+                StateMachineData.CurrentState = WaitForTimer;
+            }
+        }
+    }
+        break;
+
+    case ConnectServerNTP:
+        ESP8266_ConnectServerNTP(&StateMachineData);
+        break;
+
+    case CipsendNTP:
+        ESP8266_Cipsend("AT+CIPSEND=48\r\n", &StateMachineData);
+        break;
+
+    case GetDataNTP:
+    {
+        Common_ArrayClean(ESP8266_GetDataSendBuffer, 200);
+        ESP8266_StepStatus_e status = ESP8266_GetDataNTP(Forecast, 50, &StateMachineData);
+        if(status == ESP_STEP_OK)
+        {
+            NTCConnectCorrect++;
             HAL_GPIO_WritePin(ESP_SW_GPIO_Port, ESP_SW_Pin, GPIO_PIN_RESET);
             HAL_GPIO_WritePin(ESP_RST_GPIO_Port, ESP_RST_Pin, GPIO_PIN_RESET);
             HAL_UART_MspDeInit(&UART_HANDLER);
             StartAndResetTimer(StateMachineData.SWTimer);
+            StateMachineData.CurrentState = WaitForTimer;
         }
     }
         break;
@@ -411,6 +460,51 @@ static ESP8266_StepStatus_e ESP8266_ConnectServer(ESP8266_StateMachineData_s *Ma
     return status;
 }
 
+static ESP8266_StepStatus_e ESP8266_ConnectServerNTP(ESP8266_StateMachineData_s *MachineState)
+{
+    ESP8266_StepStatus_e status = 0;
+
+    if(MachineState->RxState == ESPReceiveIdle)
+    {
+        HAL_UART_MspInit(&UART_HANDLER);
+        ESPReceiveBufferClean(MachineState->ESPCommandReceiveBuffer, ESP8266_RECEIVE_BUFFER_SIZE);
+        CircularBuffer_FlushBuffer(&ESP8266CommandBuffer);
+        HAL_UARTEx_ReceiveToIdle_DMA(&UART_HANDLER, (uint8_t*) StateMachineData.ESPCommandReceiveBuffer, 100);
+        ESP8266SendData("AT+CIPSTART=\"UDP\",\"info.cyf-kr.edu.pl\",123\r\n", &MachineState->RxState);
+        //ESP8266ReceiveData(MachineState->ESPCommandReceiveBuffer, 200);
+        StartAndResetTimer(MachineState->StepErrorTimer);
+        status = ESP_STEP_EXECUTE;
+    }
+
+    if(MachineState->RxState == ESPWaitForData)
+    {
+        if(strstr(ESP8266CommandBuffer.Buffer, "CONNECT") != 0 || strstr(ESP8266CommandBuffer.Buffer, "OK"))
+        {
+            ESP8266_ModuleNexStep(MachineState);
+            status = ESP_STEP_OK;
+        }
+        else if(MachineState->StepErrorTimer->TimerValue > ESP8266_MAX_STEP_TIME)
+        {
+            MachineState->RxState = ESPReceiveIdle;
+            (MachineState->StepErrorCounter)++;
+            status = ESP_STEP_EXECUTE;
+
+            if(MachineState->StepErrorCounter > 5)
+            {
+                ESP8266_TotalError(MachineState);
+                status = ESP_STEP_ERR;
+            }
+        }
+        else
+        {
+            //ESP8266ReceiveData(MachineState->ESPCommandReceiveBuffer, 200);
+            HAL_UARTEx_ReceiveToIdle_DMA(&UART_HANDLER, (uint8_t*) StateMachineData.ESPCommandReceiveBuffer, 100);
+            status = ESP_STEP_EXECUTE;
+        }
+    }
+    return status;
+}
+
 static ESP8266_StepStatus_e ESP8266_GetData(char *InputData, char *DataBuffer, uint16_t DataBufferLen, DataParser_funptr ParserCallback,
         ESP8266_StateMachineData_s *MachineState)
 {
@@ -434,6 +528,47 @@ static ESP8266_StepStatus_e ESP8266_GetData(char *InputData, char *DataBuffer, u
         {
             ESP8266SendData("AT+CIPCLOSE\r\n", &MachineState->RxState);
             ParserCallback(DataBuffer);
+            ESP8266_ModuleNexStep(MachineState);
+            status = ESP_STEP_OK;
+            HAL_UART_MspDeInit(&UART_HANDLER);
+            //HAL_Delay(1000);
+        }
+        else if(MachineState->StepErrorTimer->TimerValue > 3 * ESP8266_MAX_STEP_TIME)
+        {
+            ESP8266_TotalError(MachineState);
+            status = ESP_STEP_ERR;
+        }
+    }
+
+    return status;
+}
+
+static ESP8266_StepStatus_e ESP8266_GetDataNTP(char *DataBuffer, uint16_t DataBufferLen, ESP8266_StateMachineData_s *MachineState)
+{
+    ESP8266_StepStatus_e status = 0;
+    uint8_t NTP_Packet[ESP8266_NTP_PACKET_SIZE] = { 0 };
+
+    if(MachineState->RxState == ESPReceiveIdle)
+    {
+        ESPReceiveBufferClean(MachineState->ESPCommandReceiveBuffer, ESP8266_RECEIVE_BUFFER_SIZE);
+        CircularBuffer_FlushBuffer(&ESP8266CommandBuffer);
+        HAL_UARTEx_ReceiveToIdle_DMA(&UART_HANDLER, (uint8_t*) StateMachineData.ESPCommandReceiveBuffer, 100);
+        ESP8266NTP_PreparePacket(NTP_Packet);
+        ESP8266SendDataByte(NTP_Packet, ESP8266_NTP_PACKET_SIZE, &MachineState->RxState);
+        ESP8266SendData("\r\n", &MachineState->RxState);
+
+        StartAndResetTimer(MachineState->StepErrorTimer);
+        status = ESP_STEP_EXECUTE;
+        DEBUG_NTCConnectTry++;
+    }
+
+    if(MachineState->RxState == ESPWaitForData)
+    {
+        if(strstr(ESP8266CommandBuffer.Buffer, "IPD") != 0)
+        {
+            HAL_Delay(50);
+            ESP8266SendData("AT+CIPCLOSE\r\n", &MachineState->RxState);
+            ESP8266_SetTime(ESP8266CommandBuffer.Buffer);
             ESP8266_ModuleNexStep(MachineState);
             status = ESP_STEP_OK;
             HAL_UART_MspDeInit(&UART_HANDLER);
@@ -537,6 +672,15 @@ static uint8_t ESP8266SendData(char *DataToSend, uint8_t *RxDataFlag)
     uint8_t SendDataStatus = 0;
     //SendDataStatus = HAL_UART_Transmit_DMA(&UART_HANDLER, (uint8_t*) DataToSend, strlen(DataToSend));
     SendDataStatus = HAL_UART_Transmit(&UART_HANDLER, (uint8_t*) DataToSend, strlen(DataToSend), 100);
+    *RxDataFlag = ESPWaitForData;
+    return SendDataStatus;
+}
+
+static uint8_t ESP8266SendDataByte(uint8_t *DataToSend, uint16_t DataLenght, uint8_t *RxDataFlag)
+{
+    uint8_t SendDataStatus = 0;
+    //SendDataStatus = HAL_UART_Transmit_DMA(&UART_HANDLER, (uint8_t*) DataToSend, strlen(DataToSend));
+    SendDataStatus = HAL_UART_Transmit(&UART_HANDLER, DataToSend, DataLenght, 100);
     *RxDataFlag = ESPWaitForData;
     return SendDataStatus;
 }
