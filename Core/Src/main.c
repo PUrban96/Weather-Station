@@ -192,7 +192,7 @@ int main(void)
             LCDFrontend_DrawInterface(&LCDFrontendTimer);
             ESP8266_MachineState(&ESPGetDataTimer, &ESPStepErrorTimer, &LCDDebugTimer);
             LCDBrightness_BrightnessControl(&LCDBrightnessTimer);
-            //LCDFotoSensorMeas(&FotoSensorTimer);
+            LCDBrigtness_LightSensorMeas(&FotoSensorTimer);
             HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
         }
         else if (SystemState_GetState() == SYSTEM_CONFIG)
@@ -200,6 +200,7 @@ int main(void)
             LCDFrontend_DrawConfigInterface(&LCDFrontendTimer);
             ESP8266Config_MachineState(&ESPGetDataTimer, &ESPStepErrorTimer, &LCDDebugTimer);
             LCDBrightness_BrightnessControl(&LCDBrightnessTimer);
+            LCDBrigtness_LightSensorMeas(&FotoSensorTimer);
             HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET);
         }
 
@@ -535,9 +536,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 640-1;
+  htim1.Init.Prescaler = 64-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 100-1;
+  htim1.Init.Period = 1000-1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;

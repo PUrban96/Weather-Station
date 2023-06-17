@@ -18,10 +18,10 @@
 extern TIM_HandleTypeDef            LCD_PWM_TIMER;
 #define LCD_PWM_CHANNEL             TIM_CHANNEL_1
 
-#define LCD_BRIGHTNESS_PERIOD       200 /* in milisecond */
+#define LCD_BRIGHTNESS_PERIOD       1000 /* in milisecond */
 
 #define LCD_PWM_MIN_VALUE           1
-#define LCD_PWM_MAX_VALUE           100
+#define LCD_PWM_MAX_VALUE           999
 /* ******************************************************************************** */
 
 /* Fotosensor  config */
@@ -32,8 +32,8 @@ extern ADC_HandleTypeDef            FOTOSENSOR_ADC_HANDLER;
 #define FOTOSENSOR_PERIOD           10 /* in milisecond */
 /* ******************************************************************************** */
 
-void LCDBrightness_BrightnessControl(SoftwareTimer *SWTimer);
 void LCDBrightness_Init(void);
-void LCDFotoSensorMeas(SoftwareTimer *SWTimer);
+void LCDBrightness_BrightnessControl(SoftwareTimer *SWTimer);
+void LCDBrigtness_LightSensorMeas(SoftwareTimer *SWTimer);
 
 #endif /* INC_LCDBRIGHTNESS_H_ */
