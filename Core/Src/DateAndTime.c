@@ -219,6 +219,11 @@ uint8_t GetActualMinutes(void)
     return RtcTime.Minutes;
 }
 
+uint8_t GetActualDay(void)
+{
+    return RtcDate.Date;
+}
+
 void CalculateNextDayDate(uint8_t NextDayAmount, uint16_t *Year, uint8_t *Month, uint8_t *Day)
 {
     if(RtcDate.Date + NextDayAmount <= CalculateDayInMonth())

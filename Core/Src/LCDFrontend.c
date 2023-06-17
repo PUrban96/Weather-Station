@@ -93,10 +93,22 @@ void LCDFrontend_Init(void)
 void LCDFrontend_DrawInterface(SoftwareTimer *SWTimer)
 {
     static uint8_t CurrentMinutes = 0;
+    static uint8_t CurrentDay = 0;
     //if(SWTimer->TimerValue >= LCD_FRONTEND_REFRESH_PERIOD)
-    if(GetActualMinutes() != CurrentMinutes || LCDFrontend_ExtarnalInterfaceRefresh == FLAG_SET)
+    if(GetActualMinutes() != CurrentMinutes)
     {
         CurrentMinutes = GetActualMinutes();
+
+        FrontendDrawDayName(GetDayString());
+        FrontendDrawDate(GetDateString());
+        FrontendDrawTime(GetTimeString());
+
+        StartAndResetTimer(SWTimer);
+
+    }
+    else if ((LCDFrontend_ExtarnalInterfaceRefresh == FLAG_SET) || (GetActualDay() != CurrentDay))
+    {
+        CurrentDay = GetActualDay();
         ILI9341_Fill_Screen(BLACK);
 
         FrontendDrawDayName(GetDayString());
