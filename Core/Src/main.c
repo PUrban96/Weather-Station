@@ -176,6 +176,7 @@ int main(void)
     StartAndResetTimer(&LCDDebugTimer);
 
     ESP8266NTP_SetTimeRequestFlag(FLAG_SET);
+    InsideSensor_ExternalMeasRequest();
 
     HAL_GPIO_WritePin(SPI2_T_CS_GPIO_Port, SPI2_T_CS_Pin, GPIO_PIN_SET);
     __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
@@ -187,6 +188,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
     while(1)
     {
+        HAL_IWDG_Refresh(&hiwdg);
         if(SystemState_GetState() == SYSTEM_NORMAL)
         {
             CheckActualDateAfterRestart();
@@ -206,7 +208,6 @@ int main(void)
             LCDBrigtness_LightSensorMeas(&FotoSensorTimer);
             HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET);
         }
-        HAL_IWDG_Refresh(&hiwdg);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -388,7 +389,7 @@ static void MX_IWDG_Init(void)
 
   /* USER CODE END IWDG_Init 1 */
   hiwdg.Instance = IWDG;
-  hiwdg.Init.Prescaler = IWDG_PRESCALER_64;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_256;
   hiwdg.Init.Window = 4095;
   hiwdg.Init.Reload = 4095;
   if (HAL_IWDG_Init(&hiwdg) != HAL_OK)

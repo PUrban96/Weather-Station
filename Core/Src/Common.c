@@ -10,15 +10,16 @@
 #include "SoftwareTimers.h"
 #include <time.h>
 #include <stdlib.h>
+#include "DateAndTime.h"
 
 void UnixTimeToHours(char *UinxTimestamp, char *OutputTime)
 {
     uint32_t TimeStamp = atoi(UinxTimestamp);
+    TimeStamp += (DateAndTime_GetTimeTypeOffset() * 3600);
     struct tm ts;
     time_t default_time = TimeStamp;
 
     (void) localtime_r(&default_time, &ts);
-    ts.tm_hour += 2;
     strftime(OutputTime, 6 * sizeof(char), "%H:%M", &ts);
     ;
 }
@@ -26,6 +27,7 @@ void UnixTimeToHours(char *UinxTimestamp, char *OutputTime)
 void UnixTimeToDate(char *UinxTimestamp, uint8_t *Day, uint8_t *DayWeek, uint8_t *Month, uint8_t *Year)
 {
     uint32_t TimeStamp = atoi(UinxTimestamp);
+    TimeStamp += (DateAndTime_GetTimeTypeOffset() * 3600);
     struct tm ts;
     time_t default_time = TimeStamp;
 

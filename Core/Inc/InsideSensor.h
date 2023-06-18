@@ -27,4 +27,6 @@ char *GetInsideTemperatureString(void);
 char *GetInsidePressureString(void);
 char *GetInsideHumidityString(void);
 
+void InsideSensor_ExternalMeasRequest(void);
+
 #endif /* INC_INSIDESENSOR_H_ */

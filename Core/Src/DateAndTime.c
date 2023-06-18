@@ -27,6 +27,8 @@ static char Next_1_DayString[12];
 static char Next_2_DayString[12];
 static char Next_3_DayString[12];
 
+static DateAndTime_TimeType TimeType = SUMMER_TIME;
+
 static void NextDayString(char *NexDayString, uint8_t NextDayNumber);
 static uint8_t CalculateLeapYear(void);
 static uint8_t CalculateDayInMonth(void);
@@ -382,4 +384,32 @@ uint8_t DateAndTime_CalculateDayInWeek(int Date, int Month, int Year)
     }
 
     return SystemDayNumber;
+}
+
+void DateAndTime_SetTimeType(DateAndTime_TimeType NewTimeType)
+{
+    TimeType = NewTimeType;
+}
+
+DateAndTime_TimeType DateAndTime_GetTimeType(void)
+{
+    return TimeType;
+}
+
+uint8_t DateAndTime_GetTimeTypeOffset(void)
+{
+    uint8_t TimeOffset = 0;
+
+    switch(TimeType)
+    {
+    case WINTER_TIME:
+        TimeOffset = 1;
+        break;
+
+    case SUMMER_TIME:
+        TimeOffset = 2;
+        break;
+    }
+
+    return TimeOffset;
 }

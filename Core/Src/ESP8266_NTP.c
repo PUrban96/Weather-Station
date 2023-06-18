@@ -88,6 +88,7 @@ static bool ESP8266NTP_CalculateDateAndTime(char *ResponseBuffer, ESP8266NTP_Dat
 
 static void ESP8266NTP_UnixTimeToDate(uint32_t UinxTimestamp, ESP8266NTP_DateAndTime_s *Date)
 {
+    //UinxTimestamp += (DateAndTime_GetTimeTypeOffset() * 3600);
     struct tm ts;
     time_t default_time = UinxTimestamp;
 
@@ -100,6 +101,7 @@ static void ESP8266NTP_UnixTimeToDate(uint32_t UinxTimestamp, ESP8266NTP_DateAnd
 
 static void ESP8266NTP_UnixTimeToHour(uint32_t UinxTimestamp, ESP8266NTP_DateAndTime_s *Time)
 {
+    //UinxTimestamp += (DateAndTime_GetTimeTypeOffset() * 3600);
     struct tm ts;
     time_t default_time = UinxTimestamp;
 
