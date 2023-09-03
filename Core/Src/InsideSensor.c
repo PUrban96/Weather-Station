@@ -11,6 +11,7 @@
 #include "SoftwareTimers.h"
 #include "BMXX80.h"
 #include <stdlib.h>
+#include "Common.h"
 
 /* Variable */
 /* ******************************************************************************** */
@@ -21,14 +22,17 @@ static float InsideHumidity = 0;
 static char InsideTemperatureString[6] = { 0 };
 static char InsidePresureString[6] = { 0 };
 static char InsideHumidityString[6] = { 0 };
+
+static Common_FlagState_e InsideSensor_ExternalRequest = FLAG_RESET;
 /* ******************************************************************************** */
 
 void InsideSensor_IndoorMeasurement(SoftwareTimer *SWTimer)
 {
-    if(SWTimer->TimerValue >= INSIDE_SENSOR_PERIOD)
+    if(SWTimer->TimerValue >= INSIDE_SENSOR_PERIOD || InsideSensor_ExternalRequest == FLAG_SET)
     {
         BME280_ReadTemperatureAndPressureAndHuminidity(&InsideTemperature, &InsidePressure, &InsideHumidity);
         StartAndResetTimer(SWTimer);
+        InsideSensor_ExternalRequest = FLAG_RESET;
     }
 }
 
@@ -56,4 +60,9 @@ char* GetInsideHumidityString(void)
 {
     utoa(InsideHumidity, InsideHumidityString, 10);
     return InsideHumidityString;
+}
+
+void InsideSensor_ExternalMeasRequest(void)
+{
+    InsideSensor_ExternalRequest = FLAG_SET;
 }

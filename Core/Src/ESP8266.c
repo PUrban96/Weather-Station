@@ -184,6 +184,7 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
         if(status == ESP_STEP_OK)
         {
             CorrectCounter++;
+            LCDFrontend_ExternalRefresh();
             if(ESP8266_FirstDataSuccessFlag == ESP_DATEFLAG_WAIT)
             {
                 ESP8266_FirstDataSuccessFlag = ESP_DATEFLAG_READY;
@@ -732,6 +733,7 @@ void ESP8266_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
 void ESP8266_ToggleDebugFlag(void)
 {
+    LCDFrontend_ExternalRefresh();
     if(ESP8266_DebugEnableFlag == FLAG_RESET)
     {
         ESP8266_DebugEnableFlag = FLAG_SET;
