@@ -29,8 +29,8 @@
 ## Interface
 
 <p align="left">
-  <img src="https://raw.githubusercontent.com/PUrban96/Weather-Station/master/Foto_Interface/NORMAL_MODE.jpg" width="350" title="NormalMode">
-  <img src="https://raw.githubusercontent.com/PUrban96/Weather-Station/master/Foto_Interface/CONFIG_MODE.jpg" width="374" alt="ConfigMode">
+  <img src="https://raw.githubusercontent.com/PUrban96/Weather-Station/master/Foto_Device/20230617_163019.jpg" width="350" title="NormalMode">
+  <img src="https://raw.githubusercontent.com/PUrban96/Weather-Station/master/Foto_Device/20230617_163010.jpg" width="400" alt="ConfigMode">
 </p>
 
 ## Hardware 
