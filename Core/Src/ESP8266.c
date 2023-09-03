@@ -45,6 +45,7 @@ typedef struct _ESP8266_StateMachineData_s
     uint16_t TotalErrorCounter;
     ESP_GetWeatherDataSteps_e CurrentState;
     ESP_ReceiveDataState_e RxState;
+    ESP_GetWeatherDataSteps_e LastDebugErrorStep;
 } ESP8266_StateMachineData_s;
 /* ******************************************************************************** */
 
@@ -58,13 +59,6 @@ static char ESP8266_GetDataSendBuffer[200] = { 0 };
 static Common_FlagState_e ESP8266_DebugEnableFlag = FLAG_RESET;
 
 static uint16_t DEBUG_NTCConnectTry = 0;
-/* ******************************************************************************** */
-
-/* Variable */
-/* ******************************************************************************** */
-static char ESP866_OpenWeatherAddress[] = "192.241.167.16";
-static char ESP866_OpenWeatherPort[] = "80";
-static char ESP866_OpenWeatherProtocol[] = "TCP";
 /* ******************************************************************************** */
 
 /* Function pointer - parser callback */
@@ -82,7 +76,7 @@ static ESP8266_StepStatus_e ESP8266_ConnectServer(ESP8266_StateMachineData_s *Ma
 static ESP8266_StepStatus_e ESP8266_ConnectServerNTP(ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_GetData(char *InputData, char *DataBuffer, uint16_t DataBufferLen, DataParser_funptr ParserCallback,
         ESP8266_StateMachineData_s *MachineState);
-static ESP8266_StepStatus_e ESP8266_GetDataNTP(char *DataBuffer, uint16_t DataBufferLen, ESP8266_StateMachineData_s *MachineState);
+static ESP8266_StepStatus_e ESP8266_GetDataNTP(ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_Cipsend(char *InputCipsend, ESP8266_StateMachineData_s *MachineState);
 static ESP8266_StepStatus_e ESP8266_WaitForTimer(ESP8266_StateMachineData_s *MachineState);
 
@@ -117,6 +111,7 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
         FrontEndDrawDebugInfo(CorrectCounter, 210, 30);
         FrontEndDrawDebugInfo(DEBUG_NTCConnectTry, 180, 45);
         FrontEndDrawDebugInfo(NTCConnectCorrect, 210, 45);
+        FrontEndDrawDebugInfo(StateMachineData.LastDebugErrorStep, 10, 45);
     }
 
     switch(StateMachineData.CurrentState)
@@ -213,7 +208,7 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
     case GetDataNTP:
     {
         Common_ArrayClean(ESP8266_GetDataSendBuffer, 200);
-        ESP8266_StepStatus_e status = ESP8266_GetDataNTP(Forecast, 50, &StateMachineData);
+        ESP8266_StepStatus_e status = ESP8266_GetDataNTP(&StateMachineData);
         if(status == ESP_STEP_OK)
         {
             NTCConnectCorrect++;
@@ -239,6 +234,7 @@ void ESP8266_MachineState(SoftwareTimer *SWTimer, SoftwareTimer *StepErrorTimer,
 static ESP8266_StepStatus_e ESP826_ModuleStart(ESP8266_StateMachineData_s *MachineState)
 {
     ESP8266_StepStatus_e status = 0;
+    MachineState->LastDebugErrorStep = 0;
 
     if(MachineState->RxState == ESPReceiveIdle)
     {
@@ -544,7 +540,7 @@ static ESP8266_StepStatus_e ESP8266_GetData(char *InputData, char *DataBuffer, u
     return status;
 }
 
-static ESP8266_StepStatus_e ESP8266_GetDataNTP(char *DataBuffer, uint16_t DataBufferLen, ESP8266_StateMachineData_s *MachineState)
+static ESP8266_StepStatus_e ESP8266_GetDataNTP(ESP8266_StateMachineData_s *MachineState)
 {
     ESP8266_StepStatus_e status = 0;
     uint8_t NTP_Packet[ESP8266_NTP_PACKET_SIZE] = { 0 };
@@ -632,8 +628,18 @@ static ESP8266_StepStatus_e ESP8266_Cipsend(char *InputCipsend, ESP8266_StateMac
 static ESP8266_StepStatus_e ESP8266_WaitForTimer(ESP8266_StateMachineData_s *MachineState)
 {
     ESP8266_StepStatus_e status = 0;
+    uint32_t ESP8266_DataPeriod = 0;
 
-    if(MachineState->SWTimer->TimerValue >= (uint32_t) (1000 * 60 * ESP8266_GET_DATA_PERIOD))
+    if(ESP8266_DebugEnableFlag == FLAG_RESET)
+    {
+        ESP8266_DataPeriod = 1000UL * 60UL * ESP8266_GET_DATA_PERIOD;
+    }
+    else
+    {
+        ESP8266_DataPeriod = 1000UL * 60UL * 1UL;
+    }
+
+    if(MachineState->SWTimer->TimerValue >= ESP8266_DataPeriod)
     {
         MachineState->CurrentState = ModuleStart;
         HAL_UART_MspInit(&UART_HANDLER);
@@ -662,6 +668,7 @@ static void ESP8266_ModuleNexStep(ESP8266_StateMachineData_s *MachineState)
 
 static void ESP8266_TotalError(ESP8266_StateMachineData_s *MachineState)
 {
+    MachineState->LastDebugErrorStep = MachineState->CurrentState;
     MachineState->CurrentState = WaitForTimer;
     StartAndResetTimer(MachineState->SWTimer);
     (MachineState->TotalErrorCounter)++;
