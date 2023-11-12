@@ -422,11 +422,11 @@ uint8_t DateAndTime_GetTimeTypeOffset(void)
 
 static void DateAndTime_ChangeTimeControl(void)
 {
-    if(RtcDate.Month > 10 && RtcDate.Month > 0 && RtcDate.Month <= 3)
+    if(RtcDate.Month > 10 || (RtcDate.Month > 0 && RtcDate.Month < 3))
     {
         DateAndTime_SetTimeType(WINTER_TIME);
     }
-    else if(RtcDate.Month > 3 && RtcDate.Month <= 10)
+    else if(RtcDate.Month > 3 && RtcDate.Month < 10)
     {
         DateAndTime_SetTimeType(SUMMER_TIME);
     }
