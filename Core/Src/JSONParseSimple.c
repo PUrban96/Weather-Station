@@ -28,12 +28,13 @@ void GetParametersValue(const char *InputJSON, const char *JSONParameterNameIn, 
             EndParameterPointer1 = strchr(StartParameterPointer, '}');
             EndParameterPointer2 = strchr(StartParameterPointer, ',');
         }
-        else if(DataType == String)
+        else
         {
             StartParameterPointer = strchr(ParameterPointer, ':') + (2 * sizeof(char));
             EndParameterPointer1 = strchr(StartParameterPointer, 'n');
             EndParameterPointer2 = strchr(StartParameterPointer, 'd');
         }
+
         char *EndParameterPointer = NULL;
 
         if(EndParameterPointer1 == NULL)
@@ -58,8 +59,15 @@ void GetParametersValue(const char *InputJSON, const char *JSONParameterNameIn, 
             return;
         }
 
-        uint8_t ParameterLen = EndParameterPointer - StartParameterPointer;
-        memcpy(JSONParamaterValueOut, StartParameterPointer, ParameterLen);
+        if(EndParameterPointer != NULL)
+        {
+            uint8_t ParameterLen = EndParameterPointer - StartParameterPointer;
+            memcpy(JSONParamaterValueOut, StartParameterPointer, ParameterLen);
+        }
+        else
+        {
+            memcpy(JSONParamaterValueOut, "0", sizeof(char));
+        }
     }
     else
     {
@@ -79,9 +87,9 @@ void GetParametersValueForecast(const char *InputJSON, const char *JSONParameter
     sprintf(DateSectionSearch, "%d-%02d-%02d %s", (int) NextYear, (int) NextMonth, (int) NextDay, HourString);
 
     char *ParameterPointer = NULL;
-    char *StartParameterPointer;
-    char *EndParameterPointer1;
-    char *EndParameterPointer2;
+    char *StartParameterPointer = NULL;
+    char *EndParameterPointer1 = NULL;
+    char *EndParameterPointer2 = NULL;
 
     ParameterPointer = strstr(InputJSON, DateSectionSearch);
     ParameterPointer = strstr(ParameterPointer, JSONParameterNameIn);
