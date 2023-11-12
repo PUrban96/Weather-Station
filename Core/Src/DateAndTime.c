@@ -27,11 +27,12 @@ static char Next_1_DayString[12];
 static char Next_2_DayString[12];
 static char Next_3_DayString[12];
 
-static DateAndTime_TimeType TimeType = SUMMER_TIME;
+static DateAndTime_TimeType TimeType = WINTER_TIME;
 
 static void NextDayString(char *NexDayString, uint8_t NextDayNumber);
 static uint8_t CalculateLeapYear(void);
 static uint8_t CalculateDayInMonth(void);
+static void DateAndTime_ChangeTimeControl(void);
 
 void ReadDateAndTime(SoftwareTimer *SWTimer)
 {
@@ -46,6 +47,8 @@ void ReadDateAndTime(SoftwareTimer *SWTimer)
         {
             ESP8266NTP_SetTimeRequestFlag(FLAG_SET);
         }
+
+        DateAndTime_ChangeTimeControl();
     }
 }
 
@@ -79,14 +82,17 @@ void DateTime_SetNewDate(uint8_t Day, uint8_t DayWeek, uint8_t Month, uint8_t Ye
 
 void DateTime_SetNewTime(uint8_t Hour, uint8_t Minutes, uint8_t Seconds)
 {
-    RTC_TimeTypeDef sTime = { 0 };
-    sTime.Hours = Hour;
-    sTime.Minutes = Minutes;
-    sTime.Seconds = Seconds;
-    sTime.SubSeconds = 0;
-    sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-    sTime.StoreOperation = RTC_STOREOPERATION_RESET;
-    HAL_RTC_SetTime(&RTC_HANDLER, &sTime, RTC_FORMAT_BIN);
+    if(Hour < 24 && Minutes < 59 && Seconds < 59)
+    {
+        RTC_TimeTypeDef sTime = { 0 };
+        sTime.Hours = Hour;
+        sTime.Minutes = Minutes;
+        sTime.Seconds = Seconds;
+        sTime.SubSeconds = 0;
+        sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+        sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+        HAL_RTC_SetTime(&RTC_HANDLER, &sTime, RTC_FORMAT_BIN);
+    }
 }
 
 char* GetTimeString(void)
@@ -412,4 +418,64 @@ uint8_t DateAndTime_GetTimeTypeOffset(void)
     }
 
     return TimeOffset;
+}
+
+static void DateAndTime_ChangeTimeControl(void)
+{
+    if(RtcDate.Month > 10 && RtcDate.Month > 0 && RtcDate.Month <= 3)
+    {
+        DateAndTime_SetTimeType(WINTER_TIME);
+    }
+    else if(RtcDate.Month > 3 && RtcDate.Month <= 10)
+    {
+        DateAndTime_SetTimeType(SUMMER_TIME);
+    }
+
+    //summer time to winter time
+    else if(RtcDate.Month == 10)
+    {
+        if(RtcDate.Date < 25)
+        {
+            DateAndTime_SetTimeType(SUMMER_TIME);
+        }
+        else if(RtcDate.Date > 25)
+        {
+            if(RtcDate.Date - RtcDate.WeekDay > 25)
+            {
+                DateAndTime_SetTimeType(WINTER_TIME);
+            }
+            else if(RtcDate.Date - RtcDate.WeekDay <= 25)
+            {
+                DateAndTime_SetTimeType(SUMMER_TIME);
+            }
+            else if(RtcDate.WeekDay == 7)
+            {
+                DateAndTime_SetTimeType(WINTER_TIME);
+            }
+        }
+    }
+
+    //winter time to summer time
+    else if(RtcDate.Month == 3)
+    {
+        if(RtcDate.Date < 25)
+        {
+            DateAndTime_SetTimeType(WINTER_TIME);
+        }
+        else if(RtcDate.Date > 25)
+        {
+            if(RtcDate.Date - RtcDate.WeekDay > 25)
+            {
+                DateAndTime_SetTimeType(SUMMER_TIME);
+            }
+            else if(RtcDate.Date - RtcDate.WeekDay <= 25)
+            {
+                DateAndTime_SetTimeType(WINTER_TIME);
+            }
+            else if(RtcDate.WeekDay == 7)
+            {
+                DateAndTime_SetTimeType(SUMMER_TIME);
+            }
+        }
+    }
 }
