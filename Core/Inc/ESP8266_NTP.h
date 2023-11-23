@@ -25,12 +25,6 @@ typedef struct _ESP8266NTP_DateAndTime_s
     uint8_t DayWeek;
 } ESP8266NTP_DateAndTime_s;
 
-typedef enum _ESP8266NTP_TimeType_e
-{
-    NTP_WINTER_TIME = 1,
-    NTP_DAYLIGHT_TIME = 2
-}ESP8266NTP_TimeType_e;
-
 void ESP8266NTP_PreparePacket(uint8_t *packetBuffer);
 bool ESP8266_SetTime(char *ResponseBuffer);
 char *ESP8266NTP_GetServer(void);

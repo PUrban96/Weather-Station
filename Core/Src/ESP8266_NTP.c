@@ -21,8 +21,6 @@ static char ESP8266NTP_Port[] = "123";
 static char ESP8266NTP_Protocol[] = "UDP";
 
 static Common_FlagState_e ESP8266NTP_TimeRequestFlag = FLAG_RESET;
-static ESP8266NTP_TimeType_e ESP8266NTP_TimeType = NTP_DAYLIGHT_TIME;
-
 
 static bool ESP8266NTP_CalculateDateAndTime(char *ResponseBuffer, ESP8266NTP_DateAndTime_s *DateAndTime);
 static void ESP8266NTP_UnixTimeToDate(uint32_t UinxTimestamp, ESP8266NTP_DateAndTime_s *Date);
@@ -88,7 +86,7 @@ static bool ESP8266NTP_CalculateDateAndTime(char *ResponseBuffer, ESP8266NTP_Dat
 
 static void ESP8266NTP_UnixTimeToDate(uint32_t UinxTimestamp, ESP8266NTP_DateAndTime_s *Date)
 {
-    //UinxTimestamp += (DateAndTime_GetTimeTypeOffset() * 3600);
+    UinxTimestamp += (DateAndTime_GetTimeTypeOffset() * 3600);
     struct tm ts;
     time_t default_time = UinxTimestamp;
 
@@ -101,12 +99,12 @@ static void ESP8266NTP_UnixTimeToDate(uint32_t UinxTimestamp, ESP8266NTP_DateAnd
 
 static void ESP8266NTP_UnixTimeToHour(uint32_t UinxTimestamp, ESP8266NTP_DateAndTime_s *Time)
 {
-    //UinxTimestamp += (DateAndTime_GetTimeTypeOffset() * 3600);
+    UinxTimestamp += (DateAndTime_GetTimeTypeOffset() * 3600);
     struct tm ts;
     time_t default_time = UinxTimestamp;
 
     (void) localtime_r(&default_time, &ts);
-    Time->Hour = ts.tm_hour + ESP8266NTP_TimeType;
+    Time->Hour = ts.tm_hour;
     Time->Minute = ts.tm_min;
     Time->Second = ts.tm_sec;
 }

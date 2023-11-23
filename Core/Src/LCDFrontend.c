@@ -407,7 +407,7 @@ static void FrontendDrawWindDirection(char *WindDirecion)
 
 static void FrontendDrawWindSpeed(char *WindSpeed)
 {
-    ILI9341_Draw_WindSpeed(WindSpeed, 95, 295, WHITE, 2, BLACK);
+    ILI9341_Draw_WindSpeed(WindSpeed, 85, 295, WHITE, 2, BLACK);
 }
 /* ******************************************************************************* */
 

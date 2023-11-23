@@ -908,6 +908,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 }
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+    htim=htim;
+
     CheckActiveAndIncrementTimer(&InsideSensorTimer);
     CheckActiveAndIncrementTimer(&LCDFrontendTimer);
     CheckActiveAndIncrementTimer(&ESPStepErrorTimer);
