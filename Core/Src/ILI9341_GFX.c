@@ -345,7 +345,7 @@ void ILI9341_Draw_WindSpeed(const char *Text, uint16_t X, uint16_t Y, uint16_t C
         ILI9341_Draw_Char(*Text++, X, Y, Colour, Size, Background_Colour);
         X += CHAR_WIDTH * Size;
     }
-    ILI9341_Draw_Text("m/s", X, Y, Colour, Size, Background_Colour);
+    ILI9341_Draw_Text("km/h", X, Y, Colour, Size, Background_Colour);
 }
 
 void ILI9341_Draw_WindDirection(uint16_t Direction, uint16_t X, uint16_t Y, uint16_t r, uint16_t Colour1, uint16_t Colour2, uint16_t Colour3)

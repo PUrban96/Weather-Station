@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 #include "main.h"
 #include "stm32g0xx_hal.h"
 #include "JSONParseSimple.h"
@@ -32,6 +33,7 @@ static char CurrentWeatherRain1h[6] = "0";
 static char CurrentWeatherSunrise[12] = "00:00";
 static char CurrentWeatherSunset[12] = "00:00";
 static char CurrentWeatherWindSpeed[6] = "0";
+static char CurrentWeatherWindSpeedKmH[6] = "0";
 static char CurrentWeatherWindDegree[6] = "0";
 static char CurrentWeatherWindCloudness[4] = "0";
 static char CurrentWeatherWindVisibility[6] = "0";
@@ -53,6 +55,7 @@ static char Forecast_Day3_Icon[4] = "01d";
 
 /* Function declaration */
 /* ******************************************************************************** */
+static void ConvertWindSpeedToKilometersPerHour(void);
 static void GetWeatherDataFormJSON(const char *JSONWeatherData, const char *ParameterName, char *JSONParamaterValueOut, uint8_t DataType);
 static void GetForecastDataFormJSON(const char *JSONWeatherData, const char *ParameterName, char *JSONParamaterValueOut, uint8_t DataType,
         uint8_t NextDayNumber, const char *ForecastHour);
@@ -86,6 +89,7 @@ void CurrentWeatherDataParse(const char *CurrentWeatherJSON)
 
     Common_ArrayClean(CurrentWeatherWindSpeed, 6);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "speed", CurrentWeatherWindSpeed, Int);
+    ConvertWindSpeedToKilometersPerHour();
 
     Common_ArrayClean(CurrentWeatherWindDegree, 6);
     GetWeatherDataFormJSON(CurrentWeatherJSON, "deg", CurrentWeatherWindDegree, Int);
@@ -171,7 +175,13 @@ char* GetCurrentWeatherSunset()
 
 char* GetCurrentWeatherWindSpeed()
 {
-    return CurrentWeatherWindSpeed;
+    return CurrentWeatherWindSpeedKmH;
+}
+
+static void ConvertWindSpeedToKilometersPerHour(void)
+{
+    double WindSpeedMeterPerSecond = atof(CurrentWeatherWindSpeed);
+    sprintf(CurrentWeatherWindSpeedKmH, "%.1f", (WindSpeedMeterPerSecond * 3.6));
 }
 
 char* GetCurrentWeatherWindDegree()
