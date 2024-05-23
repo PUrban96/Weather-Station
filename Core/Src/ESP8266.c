@@ -422,7 +422,7 @@ static ESP8266_StepStatus_e ESP8266_ConnectServer(ESP8266_StateMachineData_s *Ma
         ESPReceiveBufferClean(MachineState->ESPCommandReceiveBuffer, ESP8266_RECEIVE_BUFFER_SIZE);
         CircularBuffer_FlushBuffer(&ESP8266CommandBuffer);
         HAL_UARTEx_ReceiveToIdle_DMA(&UART_HANDLER, (uint8_t*) StateMachineData.ESPCommandReceiveBuffer, 100);
-        ESP8266SendData("AT+CIPSTART=\"TCP\",\"192.241.167.16\",80\r\n", &MachineState->RxState);
+        ESP8266SendData("AT+CIPSTART=\"TCP\",\"api.openweathermap.org\",80\r\n", &MachineState->RxState);
         //ESP8266ReceiveData(MachineState->ESPCommandReceiveBuffer, 200);
         StartAndResetTimer(MachineState->StepErrorTimer);
         status = ESP_STEP_EXECUTE;
